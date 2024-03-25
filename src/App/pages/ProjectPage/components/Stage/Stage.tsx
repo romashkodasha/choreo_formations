@@ -6,6 +6,7 @@ import { observer } from 'mobx-react';
 
 import styles from './Stage.module.scss';
 import Formations from '../Formations';
+import DanceSimulation from '../DanceSimulation';
 
 const Stage: React.FC = () => {
   const [newDancerName, setNewDancerName] = React.useState('');
@@ -54,7 +55,8 @@ const Stage: React.FC = () => {
             ))}
           </div>
         )}
-        <Formations formations={choreoStore.formations} setSelectedFormation={choreoStore.setSelectedFormation} selectedFormation={choreoStore.selectedFormation?.sequenceNumber}/>
+        <Formations />
+        {choreoStore.formations && <DanceSimulation />}
       </ChoreoStoreProvider>
     </div>
   );

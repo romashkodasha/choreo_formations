@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "antd": "^5.14.1",
     "axios": "^1.6.2",
     "mobx": "^6.12.0",
     "mobx-react": "^9.1.0",
@@ -19,6 +20,7 @@
     "react-dom": "^18.2.0",
     "react-draggable": "^4.4.6",
     "react-router-dom": "^6.18.0",
+    "react-spring": "^9.7.3",
     "sass": "^1.69.5"
   },
   "devDependencies": {

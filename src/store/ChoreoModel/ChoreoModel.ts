@@ -24,10 +24,10 @@ class ChoreoStore {
       selectedFormation: computed,
 
       getFormationsList: action,
-      addFormation: action,
       updateFormation: action,
       removeFormation: action,
-      addDancer: action,
+      addDancer: action.bound,
+      addFormation: action.bound,
       setSelectedFormation: action.bound,
       setPosition: action.bound,
     });
@@ -51,8 +51,21 @@ class ChoreoStore {
     this._selectedFormation = this._formations[0];
   }
 
-  addFormation(formation: FormationModel) {
-    this._formations.push(formation);
+  addFormation(timeStart: string, timeEnd: string) {
+    const lastPositions = [];
+    for (const position of this.formations[this.formations.length - 1]
+      .positions) {
+      lastPositions.push(Object.assign({}, position));
+    }
+    const lastNumber =
+      this.formations[this.formations.length - 1].sequenceNumber;
+
+    this._formations?.push({
+      sequenceNumber: lastNumber + 1,
+      positions: lastPositions,
+      timeStart: timeStart,
+      timeEnd: timeEnd,
+    });
   }
 
   updateFormation(sequenceNumber: number, updatedFormation: FormationModel) {
