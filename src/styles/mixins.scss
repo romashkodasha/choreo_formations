@@ -1,0 +1,57 @@
+@use 'sass:map';
+
+@mixin square($size) {
+  width: $size;
+  height: $size;
+}
+
+@mixin hover {
+  :global(.desktop) & {
+    &:hover {
+      cursor: pointer;
+      @content;
+    }
+  }
+
+  :global(.mobile) & {
+    &:active {
+      @content;
+    }
+  }
+}
+
+@mixin animate($properties, $transitionTime: 0.2) {
+  $resultElements: ();
+  @each $property in $properties {
+    $resultElements: append(
+      $resultElements,
+      $property #{$transitionTime}s ease
+    );
+  }
+
+  transition: join($resultElements, (), comma);
+}
+
+@mixin centerPos(
+$config: (
+is-3d: false,
+)
+) {
+$x: if(map.get($config, axis) == x or not map.get($config, axis), -50%, 0);
+$y: if(map.get($config, axis) == y or not map.get($config, axis), -50%, 0);
+$translate: if(
+map.get($config, is-3d),
+translate3d($x, $y, 0),
+translate($x, $y)
+);
+
+@if $y == -50% {
+top: 50%;
+}
+
+@if $x == -50% {
+left: 50%;
+}
+
+transform: $translate map.get($config, properties);
+}

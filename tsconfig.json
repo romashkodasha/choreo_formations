@@ -23,7 +23,11 @@
       "store": ["store/*"],
       "pages": ["pages/*"],
       "consts": ["consts/*"],
-      "shared": ["shared/*"]
+      "shared": ["shared/*"],
+      "styles": ["styles/*"],
+      "static": ["static/*"],
+      "components": ["components/*"],
+      "config": ["config/*"]
     }
   },
   "include": ["src/"],
