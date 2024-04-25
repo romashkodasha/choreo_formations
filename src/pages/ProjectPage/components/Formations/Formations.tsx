@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useChoreoStore } from 'store/ChoreoModel';
+import { useChoreoStore } from 'store';
 import styles from './Formations.module.scss';
 import { observer } from 'mobx-react';
 

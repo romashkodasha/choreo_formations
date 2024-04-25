@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import ChoreoStore from './ChoreoModel';
+import ChoreoStore from './ChoreoStore';
 
 const ChoreoStoreContext = React.createContext<ChoreoStore | null>(null);
 

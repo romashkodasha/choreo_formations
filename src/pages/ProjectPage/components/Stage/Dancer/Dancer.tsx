@@ -1,7 +1,7 @@
 import * as React from 'react';
 import styles from './Dancer.module.scss';
 import Draggable from 'react-draggable';
-import { useChoreoStore } from 'store/ChoreoModel';
+import { useChoreoStore } from 'store';
 import { observer } from 'mobx-react';
 
 type Props = {

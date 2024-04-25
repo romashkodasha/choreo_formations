@@ -1,6 +1,6 @@
 import * as React from 'react';
 import Dancer from './Dancer';
-import ChoreoStore, { ChoreoStoreProvider } from 'store/ChoreoModel';
+import ChoreoStore, { ChoreoStoreProvider } from 'store';
 import { useLocalStore } from 'shared/hooks';
 import { observer } from 'mobx-react';
 

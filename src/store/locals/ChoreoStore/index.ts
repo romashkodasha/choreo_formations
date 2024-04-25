@@ -1,4 +1,4 @@
-export { default } from './ChoreoModel';
+export { default } from './ChoreoStore';
 
 export * from './context';
 

@@ -3,7 +3,7 @@ import * as React from 'react';
 import s from './RegisterPage.module.scss';
 import { Button, Form, Input } from 'antd';
 import { Link } from 'react-router-dom';
-import { RoutesEnum } from 'config/routes';
+import { RoutePath } from 'config/router';
 
 const RegisterPage: React.FC = () => {
   const [form] = Form.useForm();
@@ -102,7 +102,7 @@ const RegisterPage: React.FC = () => {
               Зарегистрироваться
             </Button>
           </Form.Item>
-          <Form.Item className={s.login}>Уже есть аккаунт?{' '}<Link to={RoutesEnum.auth}>Войти!</Link></Form.Item>
+          <Form.Item className={s.login}>Уже есть аккаунт?{' '}<Link to={RoutePath.auth}>Войти!</Link></Form.Item>
         </Form>
       </div>
     </div>

@@ -3,14 +3,30 @@ import * as React from 'react';
 import s from './AuthPage.module.scss';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Checkbox, Form, Input } from 'antd';
-import { Logo } from 'components/common';
+import { Logo, ScreenSpinner } from 'components/common';
 import { Link } from 'react-router-dom';
-import { RoutesEnum } from 'config/routes';
+import { RoutePath } from 'config/router';
+import { useRouterStore, useUserStore } from 'store/hooks';
+import { observer } from 'mobx-react';
 
 const AuthPage: React.FC = () => {
+  const userStore = useUserStore();
+  const { replace } = useRouterStore();
+
   const onFinish = (values: any) => {
-    console.log('Received values of form: ', values);
+    userStore.login(values);
   };
+
+  if (userStore.meta.isLoading) {
+    return <ScreenSpinner />;
+  }
+
+  React.useEffect(() => {
+    if (userStore.meta.isLoaded) {
+      replace(RoutePath.root);
+    }
+  }, [userStore.meta.isLoaded, replace]);
+
   return (
     <div className={s.page}>
       <div className={s.loginForm}>
@@ -45,7 +61,7 @@ const AuthPage: React.FC = () => {
               <Checkbox>Запомнить меня</Checkbox>
             </Form.Item>
 
-            <Link className={s['login-form-forgot']} to={RoutesEnum.reset}>
+            <Link className={s['login-form-forgot']} to={''}>
               Восстановить пароль
             </Link>
           </Form.Item>
@@ -58,7 +74,7 @@ const AuthPage: React.FC = () => {
             >
               Войти
             </Button>
-            или <Link to={RoutesEnum.register}>зарегистрироваться!</Link>
+            или <Link to={RoutePath.register}>зарегистрироваться!</Link>
           </Form.Item>
         </Form>
       </div>
@@ -66,4 +82,4 @@ const AuthPage: React.FC = () => {
   );
 };
 
-export default AuthPage;
+export default observer(AuthPage);
