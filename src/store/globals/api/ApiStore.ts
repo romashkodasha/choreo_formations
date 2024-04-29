@@ -10,10 +10,6 @@ import { CommonHeaderKey, HttpAuthorizationScheme,  } from './types';
 import { ApiRequest } from './ApiRequest';
 import { RootStoreType } from 'store/globals/root';
 
-// type ApiStoreParams = {
-//   baseUrl?: string;
-// } & Omit<CreateAxiosDefaults, 'baseUrl'>;
-
 export class ApiStore {
   private _axiosInstance: AxiosInstance;
 

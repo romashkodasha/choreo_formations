@@ -17,4 +17,6 @@ const createApiEndpoint = (
 
 export const ENDPOINTS = {
   auth: createApiEndpoint('user/auth', 'POST'),
+  projects: createApiEndpoint('projects', 'GET'),
+  teams: createApiEndpoint('teams', 'GET'),
 } as const;

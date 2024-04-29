@@ -1,5 +1,6 @@
 @use 'sass:map';
 @import './colors.scss';
+@import './consts.scss';
 
 @mixin square($size) {
   width: $size;

@@ -40,7 +40,8 @@ class RootStore {
 
     if (success) {
       this.appState.setLoadedSuccessfully();
-      this.routerStore.replace(RoutePath.auth);
+      //todo: заменить на auth
+      this.routerStore.replace(RoutePath.root);
     } else {
       this.appState.setLoadedWithError();
       this.routerStore.replace(RoutePath.error);

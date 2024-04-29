@@ -1,0 +1,24 @@
+@import "styles/mixins.scss";
+
+.card {
+  display: flex;
+  flex-direction: row;
+  border: 1px solid $purple;
+  border-radius: $border-radius;
+  padding: 20px;
+  align-items: center;
+  @include animate(scale);
+  cursor: pointer;
+
+  &:hover {
+    scale: 1.1;
+  }
+}
+
+.avatar {
+  margin-right: 20px;
+}
+
+.content {
+  flex: 1;
+}

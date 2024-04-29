@@ -31,7 +31,8 @@
       "static": ["static/*"],
       "components": ["components/*"],
       "config": ["config/*"],
-      "utils": ["utils/*"]
+      "utils": ["utils/*"],
+      "entities": ["entities/*"]
     }
   },
   "include": ["src"]

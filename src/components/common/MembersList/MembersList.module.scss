@@ -1,0 +1,22 @@
+@import "styles/mixins.scss";
+
+.list {
+    display: flex;
+    flex-direction: column;
+    background-color: $purple;
+    padding: 20px;
+    border-radius: $border-radius;
+    border: 1px solid $purple;
+}
+
+.member {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    color: $white;
+}
+
+.avatar {
+  margin-right: 20px;
+  border: 2px solid $white;
+}
