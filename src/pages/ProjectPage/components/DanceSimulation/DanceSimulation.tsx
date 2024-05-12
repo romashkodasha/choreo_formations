@@ -1,18 +1,21 @@
 import * as React from 'react';
-// import { useSprings, animated } from 'react-spring';
-// import {
-//   FormationModel,
-//   PositionModel,
-//   useChoreoStore,
-// } from 'store/ChoreoModel';
+import { useSprings } from 'react-spring';
+import { useChoreoStore } from 'store/locals/ChoreoStore';
 // import Dancer from '../Stage/Dancer';
 
 // import style from './DanceSimulation.module.scss';
 // import { parseTime } from 'utils/parseTime';
 
 const DanceSimulation: React.FC = () => {
-  return(<></>)
-  // const { formations, dancers } = useChoreoStore();
+  const { formations, members } = useChoreoStore();
+
+  if (!members || !formations) return;
+
+  const [springs, api] = useSprings(members.length, () => ({
+    from: formations
+  }), []);
+
+  return <></>;
 
   // const springs = useSprings(
   //   formations.length,
@@ -39,7 +42,6 @@ const DanceSimulation: React.FC = () => {
 
   //   return [];
   // };
-
 
   // return (
   //   <div>

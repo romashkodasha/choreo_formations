@@ -7,7 +7,7 @@ import cn from 'classnames';
 import { Avatar } from 'antd';
 
 type MembersListProps = {
-  members: MemberModel[];
+  members?: MemberModel[];
   className?: string;
   style?: React.CSSProperties;
 };
@@ -15,8 +15,8 @@ type MembersListProps = {
 const MembersList: React.FC<MembersListProps> = ({ members, className, style }) => {
   return (
     <div className={cn(s.list, className)} style={style}>
-      {members.map((member) => (
-        <div className={s.member}>
+      {members?.map((member) => (
+        <div className={s.member} key={member.id}>
           <Avatar className={s.avatar} style={{backgroundColor: member.color}}/>
           {member.name}
         </div>

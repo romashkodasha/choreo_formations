@@ -1,18 +1,17 @@
-import { IMember, normalizeMember } from "entities/member";
+import { IMember, IMemberServer, normalizeMember } from 'entities/member';
 
+export class MemberModel implements IMember {
+  readonly id: number;
+  readonly name: string;
+  readonly color: string;
 
-export class MemberModel implements IMember{
-    readonly id: number;
-    readonly name: string;
-    readonly color: string;
+  constructor(data: IMember) {
+    this.id = data.id;
+    this.name = data.name;
+    this.color = data.color;
+  }
 
-    constructor (data: IMember){
-        this.id = data.id;
-        this.name = data.name;
-        this.color = data.color;
-    }
-
-    static fromJson({data}: {data: IMember}): MemberModel{
-        return new MemberModel(normalizeMember(data));
-    }
+  static fromJson({ data }: { data: IMemberServer }): MemberModel {
+    return new MemberModel(normalizeMember(data));
+  }
 }

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useChoreoStore } from 'store';
+import { useChoreoStore } from 'store/locals/ChoreoStore';
 import styles from './Formations.module.scss';
 import { observer } from 'mobx-react';
 
@@ -30,7 +30,7 @@ const Formations: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {formations.map((formation) => (
+          {formations?.map((formation) => (
             <tr
               key={formation.sequenceNumber}
               onClick={() => handleRowClick(formation.sequenceNumber)}

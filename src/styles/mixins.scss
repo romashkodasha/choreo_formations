@@ -1,6 +1,6 @@
-@use 'sass:map';
-@import './colors.scss';
-@import './consts.scss';
+@use "sass:map";
+@import "./colors.scss";
+@import "./consts.scss";
 
 @mixin square($size) {
   width: $size;
@@ -35,25 +35,25 @@
 }
 
 @mixin centerPos(
-$config: (
-is-3d: false,
-)
+  $config: (
+    is-3d: false,
+  )
 ) {
-$x: if(map.get($config, axis) == x or not map.get($config, axis), -50%, 0);
-$y: if(map.get($config, axis) == y or not map.get($config, axis), -50%, 0);
-$translate: if(
-map.get($config, is-3d),
-translate3d($x, $y, 0),
-translate($x, $y)
-);
+  $x: if(map.get($config, axis) == x or not map.get($config, axis), -50%, 0);
+  $y: if(map.get($config, axis) == y or not map.get($config, axis), -50%, 0);
+  $translate: if(
+    map.get($config, is-3d),
+    translate3d($x, $y, 0),
+    translate($x, $y)
+  );
 
-@if $y == -50% {
-top: 50%;
-}
+  @if $y == -50% {
+    top: 50%;
+  }
 
-@if $x == -50% {
-left: 50%;
-}
+  @if $x == -50% {
+    left: 50%;
+  }
 
-transform: $translate map.get($config, properties);
+  transform: $translate map.get($config, properties);
 }

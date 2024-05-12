@@ -1,23 +1,23 @@
 import * as React from 'react';
 import styles from './Dancer.module.scss';
 import Draggable from 'react-draggable';
-import { useChoreoStore } from 'store';
+import { useChoreoStore } from 'store/locals/ChoreoStore';
 import { observer } from 'mobx-react';
 
 type Props = {
-  dancerID: number;
+  id: number;
   name: string;
   color: string;
 };
 
 const Dancer: React.FC<Props> = ({
-  dancerID,
+  id,
   name,
   color,
 }) => {
-  const { selectedFormation, setPosition } = useChoreoStore();
+  const { selectedFormation, setPosition} = useChoreoStore();
   const position = selectedFormation?.positions.find(
-    (position) => position.dancerID === dancerID
+    (position) => position.dancerId === id
   );
   const nodeRef = React.useRef(null);
 
@@ -26,17 +26,17 @@ const Dancer: React.FC<Props> = ({
     positionDrag: { x: number; y: number }
   ) => {
     const { x, y } = positionDrag;
-    setPosition(dancerID, x, y);
+    setPosition(id, x, y);
   };
 
   return (
     <Draggable
       bounds="parent"
-      onDrag={onControlledDrag}
+      onStop={onControlledDrag}
       nodeRef={nodeRef}
       position={{
-        x: position ? position.position_x : 0,
-        y: position ? position.position_y : 0,
+        x: position ? position.positionX : 0,
+        y: position ? position.positionY : 0,
       }}
     >
       <div className={styles.point} ref={nodeRef}>

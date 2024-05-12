@@ -6,6 +6,8 @@ import { MembersList } from '../MembersList';
 import cn from 'classnames';
 
 import s from './ProjectCard.module.scss';
+import { useRouterStore } from 'store/hooks';
+import { RoutePath } from 'config/router';
 
 type ProjectCardProps = {
   project: ProjectModel;
@@ -14,6 +16,7 @@ type ProjectCardProps = {
 
 const ProjectCard: React.FC<ProjectCardProps> = ({ project, className }) => {
   const [showMembersList, setShowMembersList] = React.useState(false);
+  const { push } = useRouterStore();
 
   const onMouseEnterHandler = () => {
     setShowMembersList(true);
@@ -23,7 +26,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, className }) => {
     setShowMembersList(false);
   };
   return (
-    <div className={cn(s.card, className)}>
+    <div className={cn(s.card, className)} onClick={() => push(RoutePath.project, {state: { projectId: project.id}})}>
       <Typography.Title level={3}>{project.name}</Typography.Title>
       <Typography.Text>
         Cцена: {project.width} x {project.height}{' '}
@@ -35,7 +38,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, className }) => {
         Команда: {project.team.name} {showMembersList ? <DownOutlined /> : <RightOutlined />}
       </Typography.Text>
       <MembersList
-        members={project.team.members.items}
+        members={project.team.members}
         className={s.list}
         style={{
           opacity: showMembersList ? 1 : 0,

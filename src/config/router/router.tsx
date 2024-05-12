@@ -63,9 +63,7 @@ export const ROUTER = createBrowserRouter([
             path: RoutePath.project,
             element: withScreenSpinner(ProjectPage),
           },
-          {path: RoutePath.root,
-            element: withScreenSpinner(HomePage),
-          }
+          { path: RoutePath.root, element: withScreenSpinner(HomePage) },
         ],
       },
     ],

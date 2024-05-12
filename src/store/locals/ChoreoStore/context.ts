@@ -1,17 +1,13 @@
-import * as React from 'react';
+import { createContext } from 'react';
 
 import ChoreoStore from './ChoreoStore';
 
-const ChoreoStoreContext = React.createContext<ChoreoStore | null>(null);
+const ChoreoContext = createContext<{
+  store: ChoreoStore | null;
+}>({
+  store: null,
+});
 
-export const ChoreoStoreProvider = ChoreoStoreContext.Provider;
+const ChoreoStoreProvider = ChoreoContext.Provider;
 
-export const useChoreoStore = () => {
-  const context = React.useContext(ChoreoStoreContext);
-
-  if (!context) {
-    throw new Error('ChoreoStoreContext is not found');
-  }
-
-  return context;
-};
+export { ChoreoContext, ChoreoStoreProvider };

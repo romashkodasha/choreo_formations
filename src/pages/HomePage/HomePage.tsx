@@ -5,7 +5,6 @@ import {
   ProjectsStoreProvider,
 } from 'store/locals/ProjectsStore';
 import { useRootStore } from 'store/globals/root';
-import { Loader } from 'components/special/AppLayout/ui';
 import { Segmented } from 'antd';
 import { OPTIONS, OptionsEnum } from 'config/options';
 import { ProjectsList } from './ProjectsList';
@@ -14,37 +13,25 @@ import { TeamsList } from './TeamsList';
 import s from './HomePage.module.scss';
 
 const HomePage: React.FC = () => {
-  const rootStore = useRootStore();
-  const projectsStore = useLocalStore(() => new ProjectsStore(rootStore));
+  const [filter, setFilter] = React.useState(OptionsEnum.projects);
 
-
-
-  const onChange = React.useCallback(
-    (value: string) => {
-      projectsStore.filter.changeValue(value);
-    },
-    [projectsStore]
-  );
+  const onChange = (value: string) => {
+    setFilter(value);
+  };
 
   return (
-    <ProjectsStoreProvider
-      value={{
-        store: projectsStore,
-      }}
-    >
+    <>
       <Segmented
         options={OPTIONS}
         size="large"
         block
-        value={projectsStore.filter.value}
+        value={filter}
         onChange={onChange}
         className={s.filter}
       />
-      {projectsStore.filter.value === OptionsEnum.projects && (
-        <ProjectsList />
-      )}
-      {projectsStore.filter.value === OptionsEnum.teams && <TeamsList />}
-    </ProjectsStoreProvider>
+      {filter === OptionsEnum.projects && <ProjectsList />}
+      {filter === OptionsEnum.teams && <TeamsList />}
+    </>
   );
 };
 

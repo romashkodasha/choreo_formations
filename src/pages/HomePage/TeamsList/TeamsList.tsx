@@ -1,31 +1,39 @@
 import { ScreenSpinner, TeamCard } from 'components/common';
 import { observer } from 'mobx-react';
 import * as React from 'react';
-import { useProjectsStore } from 'store/locals/ProjectsStore';
+import { TeamsStore } from 'store/locals/TeamsStore';
 
 import s from './TeamsList.module.scss';
+import { useRootStore } from 'store/globals/root';
+import { useLocalStore } from 'store/hooks';
+import { FloatButton } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 
 const TeamsList: React.FC = () => {
-  const projectsStore = useProjectsStore();
+  const rootStore = useRootStore();
+  const teamsStore = useLocalStore(() => new TeamsStore(rootStore));
 
   React.useEffect(() => {
     const init = async () => {
-      await projectsStore.loadTeamsList({ initial: true });
+      await teamsStore.loadTeamsList({ initial: true });
     };
 
     void init();
-  }, [projectsStore]);
+  }, [teamsStore]);
 
-  if (projectsStore.metaTeams.isLoading) {
+  if (teamsStore.meta.isLoading) {
     return <ScreenSpinner />;
   }
-  
+
   return (
-    <div className={s.list}>
-      {projectsStore.teams.map((team) => (
-        <TeamCard team={team} className={s.card}/>
-      ))}
-    </div>
+    <>
+      <div className={s.list}>
+        {teamsStore.teams.map((team) => (
+          <TeamCard team={team} className={s.card} key={team.id} />
+        ))}
+      </div>
+      <FloatButton icon={<PlusOutlined />} tooltip={<div>Создать новую команду</div>} />
+    </>
   );
 };
 export default observer(TeamsList);

@@ -1,13 +1,17 @@
 import * as React from 'react';
 import Stage from './components/Stage';
-// import { useChoreoStore } from 'store/RootStore/hooks';
+import { useLocation } from 'react-router-dom';
+import { observer } from 'mobx-react';
 
 const ProjectPage: React.FC = () => {
-
+  const location = useLocation();
+  
   return (
-    // <Dancer color={"red"} name={"Dancer1"}/>
+    <>
+    <span>{location.state.projectId}</span>
     <Stage />
+    </>
   );
 };
 
-export default ProjectPage;
+export default observer(ProjectPage);

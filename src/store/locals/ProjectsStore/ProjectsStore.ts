@@ -10,26 +10,16 @@ import { computed, makeObservable } from 'mobx';
 import { MetaModel } from 'store/models/MetaModel';
 import { normalizeModelsList } from 'store/utils';
 import { MOCK_PROJECTS } from 'entities/mocks/projects';
-import { MOCK_TEAMS } from 'entities/mocks/teams';
-import { ValueModel } from 'store/supportiveModels/ValueModel';
-import { OptionsEnum } from 'config/options';
-import { TeamModel } from 'store/models/TeamModel';
-import { ITeamServer } from 'entities/team';
 
 const PROJECTS_LIMIT = 10;
-const TEAMS_LIMIT = 10;
 
 class ProjectsStore implements ILocalStore {
   private readonly _rootStore: RootStoreType;
   private readonly _projects = new ListModel<ProjectModel, 'id'>();
-  private readonly _teams = new ListModel<TeamModel, 'id'>();
-  readonly metaProjects = new MetaModel();
-  readonly metaTeams = new MetaModel();
-  readonly filter = new ValueModel<string>(OptionsEnum.projects);
+  readonly meta = new MetaModel();
 
   private readonly _requests: {
     loadProjectsList: ApiRequest<{ projects: IProjectServer[] }, ErrorResponse>;
-    loadTeamsList: ApiRequest<{ teams: ITeamServer[] }, ErrorResponse>;
   };
 
   constructor(rootStore: RootStoreType) {
@@ -40,15 +30,10 @@ class ProjectsStore implements ILocalStore {
         url: ENDPOINTS.projects.url,
         method: ENDPOINTS.projects.method,
       }),
-      loadTeamsList: this._rootStore.apiStore.createRequest({
-        url: ENDPOINTS.teams.url,
-        method: ENDPOINTS.teams.method,
-      }),
     };
 
     makeObservable<ProjectsStore>(this, {
       projects: computed,
-      teams: computed,
     });
   }
 
@@ -56,34 +41,22 @@ class ProjectsStore implements ILocalStore {
     return this._projects.items;
   }
 
-  get teams() {
-    return this._teams.items;
-  }
-
-  get isProjectsLoaded(): boolean {
+  get isLoaded(): boolean {
     return this._requests.loadProjectsList.isLoaded;
   }
 
-  get isProjectsLoading(): boolean {
+  get isLoading(): boolean {
     return this._requests.loadProjectsList.isLoading;
-  }
-
-  get isTeamsLoaded(): boolean {
-    return this._requests.loadTeamsList.isLoaded;
-  }
-
-  get isTeamsLoading(): boolean {
-    return this._requests.loadTeamsList.isLoading;
   }
 
   loadProjectsList = async ({
     initial = false,
   }: LoadInitialType): Promise<void> => {
-    if (this.metaProjects.isLoading) {
+    if (this.meta.isLoading) {
       return;
     }
 
-    this.metaProjects.setLoadedStartMeta();
+    this.meta.setLoadedStartMeta();
 
     const response = await this._requests.loadProjectsList.call({
       params: {
@@ -100,7 +73,7 @@ class ProjectsStore implements ILocalStore {
 
     if (response.isError) {
       this._projects.setIsInitialLoad(false);
-      this.metaProjects.setLoadedErrorMeta();
+      this.meta.setLoadedErrorMeta();
 
       return;
     } else {
@@ -114,55 +87,9 @@ class ProjectsStore implements ILocalStore {
         initial,
       });
 
-      console.log(this.projects[0]);
-
       this._projects.setHasMore(keys.length >= PROJECTS_LIMIT);
       this._projects.setIsInitialLoad(true);
-      this.metaProjects.setLoadedSuccessMeta();
-    }
-  };
-
-  loadTeamsList = async ({
-    initial = false,
-  }: LoadInitialType): Promise<void> => {
-    if (this.metaTeams.isLoading) {
-      return;
-    }
-
-    this.metaTeams.setLoadedStartMeta();
-
-    const response = await this._requests.loadTeamsList.call({
-      params: {
-        offset: initial ? 0 : this.projects.length,
-        limit: TEAMS_LIMIT,
-      },
-      //todo: удалить после прикрутки бэка
-      mockResponse: {
-        data: { teams: MOCK_TEAMS },
-        isError: false,
-        timeout: 1000,
-      },
-    });
-
-    if (response.isError) {
-      this._teams.setIsInitialLoad(false);
-      this.metaTeams.setLoadedErrorMeta();
-
-      return;
-    } else {
-      const { keys, entities } = ProjectsStore.normalizeTeams(
-        response.data.teams
-      );
-
-      this._teams.addEntities({
-        entities,
-        keys,
-        initial,
-      });
-
-      this._teams.setHasMore(keys.length >= TEAMS_LIMIT);
-      this._teams.setIsInitialLoad(true);
-      this.metaTeams.setLoadedSuccessMeta();
+      this.meta.setLoadedSuccessMeta();
     }
   };
 
@@ -175,15 +102,8 @@ class ProjectsStore implements ILocalStore {
     );
   };
 
-  static normalizeTeams = (
-    data: ITeamServer[]
-  ): { keys: number[]; entities: Record<number, TeamModel> } => {
-    return normalizeModelsList<number, ITeamServer, TeamModel>(data, TeamModel);
-  };
-
   destroy() {
     this._requests.loadProjectsList.destroy();
-    this._requests.loadTeamsList.destroy();
   }
 }
 

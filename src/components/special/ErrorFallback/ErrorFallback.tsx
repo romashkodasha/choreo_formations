@@ -7,7 +7,7 @@ import { RoutePath } from 'config/router';
 // TODO: кастомизировать стили
 import s from './ErrorFallback.module.scss';
 import { useRootStore } from 'store/globals/root';
-import { Button } from 'antd';
+import { Button, Typography } from 'antd';
 
 const ErrorFallback: React.FC = () => {
   const navigate = useNavigate();
@@ -20,8 +20,10 @@ const ErrorFallback: React.FC = () => {
 
   return (
     <section className={s['error-page']}>
-      <h2 className={s.title}>Произошла ошибка!</h2>
-      <div className={s.text}>Перезагрузите сайт или попробуйте позже</div>
+      <Typography.Title level={1}>Произошла ошибка!</Typography.Title>
+      <Typography.Title level={2}>
+        Перезагрузите сайт или попробуйте позже
+      </Typography.Title>
       <Button onClick={restart}>Перезагрузить</Button>
     </section>
   );
