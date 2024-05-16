@@ -37,8 +37,6 @@ const Stage: React.FC = () => {
     return <ScreenSpinner />;
   }
 
-  console.log(toJS(choreoStore.meta.isLoading))
-
   return (
     <ChoreoStoreProvider value={{ store: choreoStore }}>
       <div className={styles.page}>

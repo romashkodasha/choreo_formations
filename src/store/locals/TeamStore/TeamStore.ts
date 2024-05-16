@@ -92,7 +92,6 @@ class TeamStore implements ILocalStore {
       return;
     } else {
       this.setTeam(TeamStore.normalizeTeam(response.data.team));
-      console.log(this.team);
       this.meta.setLoadedSuccessMeta();
     }
   };

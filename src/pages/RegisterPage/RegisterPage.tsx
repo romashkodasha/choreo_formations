@@ -5,21 +5,18 @@ import { Button, Form, Input } from 'antd';
 import { Link } from 'react-router-dom';
 import { RoutePath } from 'config/router';
 import { useUserStore } from 'store/hooks';
-import { useRootStore } from 'store/globals/root';
+import { observer } from 'mobx-react';
 
 const RegisterPage: React.FC = () => {
   const [form] = Form.useForm();
   const userStore = useUserStore();
-  const rootStore = useRootStore();
 
   const onFinish = (values: any) => {
-    userStore
-      .register({
-        name: values.username,
-        password: values.password,
-        email: values.email,
-      })
-      .then(()=>rootStore.routerStore.push(RoutePath.root));
+    userStore.register({
+      name: values.username,
+      password: values.password,
+      email: values.email,
+    });
   };
 
   return (
@@ -114,4 +111,4 @@ const RegisterPage: React.FC = () => {
   );
 };
 
-export default RegisterPage;
+export default observer(RegisterPage);

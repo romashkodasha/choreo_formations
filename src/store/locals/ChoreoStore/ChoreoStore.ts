@@ -89,8 +89,6 @@ class ChoreoStore implements ILocalStore {
   }
 
   get positions() {
-    console.log('this.selectedFormationIndex', this.selectedFormationIndex);
-    console.log('this.formations', toJS(this.formations));
     if (this.formations) {
       return this.formations[this.selectedFormationIndex].positions;
     } else return [];
@@ -134,7 +132,6 @@ class ChoreoStore implements ILocalStore {
 
   setFormations = (formations: FormationModel[]) => {
     this._formations = formations;
-    console.log(this._formations);
   };
 
   setPositions = (positions: PositionModel[]) => {
@@ -178,8 +175,6 @@ class ChoreoStore implements ILocalStore {
           )
         );
 
-        console.log('FORMATIONS', this.formations);
-
         this.meta.setLoadedSuccessMeta();
       });
     }
@@ -222,8 +217,6 @@ class ChoreoStore implements ILocalStore {
         })
       );
     }
-
-    console.log(toJS(this._projectDetail));
   }
 
   updateFormation(sequenceNumber: number, updatedFormation: FormationModel) {

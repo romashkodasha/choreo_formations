@@ -24,6 +24,7 @@ export type RegisterData = {
 export interface ApiAuth {
   user: ApiUser;
   token: string;
+  detail?: string;
 }
 
 

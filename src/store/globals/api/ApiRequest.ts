@@ -131,14 +131,6 @@ export class ApiRequest<
       ...incomingConfig
     } = params ?? {};
 
-    /** Обработка получения cookie при SSR */
-    // if (params?.apiContext) {
-    //   incomingConfigField.headers = {
-    //     ...incomingConfigField.headers,
-    //     cookie: getCookieHeader(params.apiContext),
-    //   };
-    // }
-
     /** Обработка преобразования в FormData */
     if (params?.multipartFormData) {
       const formData = formatToFormData(incomingConfig.data || {});
@@ -254,7 +246,8 @@ export class ApiRequest<
   } {
     /** Обработка для ошибки AxiosError */
     if (response instanceof AxiosError) {
-      const errorResponse = response.response as FormattedErrorResponse;
+      const errorResponse = response.response?.data as FormattedErrorResponse;
+
 
       return {
         meta: MetaState.failed,
@@ -305,6 +298,6 @@ export class ApiRequest<
       return null;
     }
 
-    return null;
+    return response.data;
   }
 }

@@ -22,7 +22,8 @@ export class UserStore implements IGlobalStore {
   private _requests: {
     auth: ApiRequest<ApiAuth>;
     register: ApiRequest<ApiAuth>;
-    user: ApiRequest<{user: ApiUser}, ErrorResponse>;
+    user: ApiRequest<{ user: ApiUser }, ErrorResponse>;
+    logout: ApiRequest<{ status: 'ok' }, ErrorResponse>;
   };
   readonly meta = new MetaModel();
 
@@ -41,9 +42,13 @@ export class UserStore implements IGlobalStore {
         url: ENDPOINTS.register.url,
         method: ENDPOINTS.register.method,
       }),
-      user: this.rootStore.apiStore.createRequest<{user: ApiUser}>({
+      user: this.rootStore.apiStore.createRequest({
         url: ENDPOINTS.user.url,
         method: ENDPOINTS.user.method,
+      }),
+      logout: this.rootStore.apiStore.createRequest({
+        url: ENDPOINTS.logout.url,
+        method: ENDPOINTS.logout.method,
       }),
     };
     makeObservable<this, '_user' | '_setUser'>(this, {
@@ -68,10 +73,8 @@ export class UserStore implements IGlobalStore {
       return true;
     }
 
-    console.log(toJS(user));
-
-
     this._setUser(user);
+
     this._rootStore.routerStore.replace(RoutePath.root);
 
     return true;
@@ -93,7 +96,6 @@ export class UserStore implements IGlobalStore {
 
   private readonly _authorizeInit = async (): Promise<UserModel | null> => {
     const response = await this._requests.user.fetch();
-    console.log('autorizeInit')
 
     if (response?.user) {
       return UserModel.fromJson(response.user);
@@ -106,7 +108,7 @@ export class UserStore implements IGlobalStore {
     name,
     password,
     email,
-  }: RegisterData): Promise<UserModel | null> => {
+  }: RegisterData): Promise<void> => {
     this.meta.setLoadedStartMeta();
     const payload = {
       name,
@@ -121,22 +123,23 @@ export class UserStore implements IGlobalStore {
         this.meta.setLoadedErrorMeta();
 
         this.rootStore.snackbarStore.openSnackbar({
-          text: 'Произошла ошибка при регистрации, проверьте правильность введенных данных',
+          text: response?.detail,
           goal: SnackbarMessageGoalsType.error,
         });
 
-        return null;
+        return;
       }
 
-      return UserModel.fromJson(response.user);
+      this._setUser(UserModel.fromJson(response.user));
+
+      this.rootStore.routerStore.push(RoutePath.root);
+
+      return;
     }
-    return null;
+    return;
   };
 
-  readonly login = async ({
-    email,
-    password,
-  }: AuthData): Promise<UserModel | null> => {
+  readonly login = async ({ email, password }: AuthData): Promise<void> => {
     this.meta.setLoadedStartMeta();
     const payload = {
       email,
@@ -148,16 +151,28 @@ export class UserStore implements IGlobalStore {
 
       if (!response?.user) {
         this.meta.setLoadedErrorMeta();
-        return null;
+        this.rootStore.snackbarStore.openSnackbar({
+          text: response?.detail,
+          goal: SnackbarMessageGoalsType.error,
+        });
+        return;
       }
 
       this.meta.setLoadedSuccessMeta();
+      this._setUser(UserModel.fromJson(response.user));
       this._rootStore.routerStore.push(RoutePath.root);
 
-      return UserModel.fromJson(response.user);
+      return;
     } else {
       this.meta.setLoadedSuccessMeta();
-      return this._authorizeMock();
+      return;
+    }
+  };
+
+  readonly logout = async () => {
+    const response = await this._requests.logout.fetch();
+    if (response?.status === 'ok') {
+      this.rootStore.routerStore.replace(RoutePath.auth);
     }
   };
 }

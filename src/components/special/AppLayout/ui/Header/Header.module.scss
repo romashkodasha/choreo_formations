@@ -3,7 +3,12 @@
 .header {
   display: flex;
   flex-flow: row wrap;
+  align-items: center;
   justify-content: space-between;
   padding: 0 3rem;
   background-color: $purple;
+}
+
+.username {
+  margin-right: 1rem;
 }
