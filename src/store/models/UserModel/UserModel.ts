@@ -3,11 +3,13 @@ import { normalizeUser, serializeUser } from './utils';
 
 export class UserModel {
   id: number;
-  username: string | null;
+  name: string;
+  email: string;
 
   constructor(user: User) {
     this.id = user.id;
-    this.username = user.username;
+    this.name = user.name;
+    this.email = user.email;
   }
 
   static fromJson(raw: ApiUser): UserModel {

@@ -2,10 +2,12 @@ import type { ApiUser, User } from './types';
 
 export const normalizeUser = (raw: ApiUser): User => ({
   id: raw.id,
-  username: raw.username,
+  name: raw.name,
+  email: raw.email,
 });
 
 export const serializeUser = (user: User): ApiUser => ({
   id: user.id,
-  username: user.username,
+  name: user.name,
+  email: user.email,
 });

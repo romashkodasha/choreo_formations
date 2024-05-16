@@ -6,7 +6,8 @@ export interface ApiUser {
 
 export interface User {
   id: number;
-  username: string | null;
+  name: string;
+  email: string;
 }
 
 export type AuthData = {

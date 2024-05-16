@@ -3,17 +3,12 @@ import styles from './Dancer.module.scss';
 import Draggable from 'react-draggable';
 import { observer } from 'mobx-react';
 import { PositionModel } from 'store/models/PositionModel';
-import { useLocalStore } from 'store/hooks';
-import { DancerStore } from 'store/locals/DancerStore';
-import { useChoreoStore } from 'store/locals/ChoreoStore';
 
 type Props = {
   position: PositionModel;
 };
 
-const Dancer: React.FC<Props> = ({ position}) => {
-  const {updatePositions} = useChoreoStore();
-  const dancerStore = useLocalStore(() => new DancerStore(position,  updatePositions));
+const Dancer: React.FC<Props> = ({ position }) => {
   const nodeRef = React.useRef(null);
 
   const onControlledDrag = (
@@ -21,7 +16,7 @@ const Dancer: React.FC<Props> = ({ position}) => {
     positionDrag: { x: number; y: number }
   ) => {
     const { x, y } = positionDrag;
-    dancerStore.updatePosition(x, y);
+    position.updatePosition(x, y);
   };
 
 
@@ -31,8 +26,8 @@ const Dancer: React.FC<Props> = ({ position}) => {
       onStop={onControlledDrag}
       nodeRef={nodeRef}
       position={{
-        x: dancerStore.position.positionX ?? 0,
-        y: dancerStore.position.positionY ?? 0,
+        x: position.positionX ?? 0,
+        y: position.positionY ?? 0,
       }}
     >
       <div className={styles.point} ref={nodeRef}>

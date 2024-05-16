@@ -64,7 +64,6 @@ class ChoreoStore implements ILocalStore {
       currentPositions: computed,
 
       updateFormation: action.bound,
-      updatePositions: action.bound,
       removeFormation: action,
       addDancer: action.bound,
       addFormation: action.bound,
@@ -142,19 +141,6 @@ class ChoreoStore implements ILocalStore {
     if (this._formations) {
       this._formations[this.selectedFormationIndex].positions = positions;
     }
-  };
-
-  updatePositions = (id: number, newX: number, newY: number) => {
-    // Находим позицию с заданным id и обновляем ее координаты
-    const updatedPositions = this.positions.map((position) => {
-      if (position.id === id) {
-        return { ...position, positionX: newX, positionY: newY };
-      }
-      return position;
-    });
-
-    // Обновляем массив позиций
-    this.setPositions(updatedPositions);
   };
 
   loadProjectDetail = async ({ id }: { id: number }): Promise<void> => {
@@ -267,7 +253,7 @@ class ChoreoStore implements ILocalStore {
         name: name,
         color: color,
       });
-      this.selectedFormation?.positions.push({
+      this.selectedFormation?.positions.push(new PositionModel({
         id:
           this.selectedFormation.positions[
             this.selectedFormation.positions.length - 1
@@ -277,7 +263,7 @@ class ChoreoStore implements ILocalStore {
         color,
         positionX: 0,
         positionY: 0,
-      });
+      }));
     }
   }
 

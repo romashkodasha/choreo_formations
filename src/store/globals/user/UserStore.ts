@@ -22,7 +22,7 @@ export class UserStore implements IGlobalStore {
   private _requests: {
     auth: ApiRequest<ApiAuth>;
     register: ApiRequest<ApiAuth>;
-    user: ApiRequest<ApiUser, ErrorResponse>;
+    user: ApiRequest<{user: ApiUser}, ErrorResponse>;
   };
   readonly meta = new MetaModel();
 
@@ -33,15 +33,15 @@ export class UserStore implements IGlobalStore {
   constructor(public readonly rootStore: RootStoreType) {
     this._rootStore = rootStore;
     this._requests = {
-      auth: this.rootStore.apiStore.createRequest<ApiUser>({
+      auth: this.rootStore.apiStore.createRequest({
         url: ENDPOINTS.auth.url,
         method: ENDPOINTS.auth.method,
       }),
-      register: this.rootStore.apiStore.createRequest<ApiUser>({
+      register: this.rootStore.apiStore.createRequest({
         url: ENDPOINTS.register.url,
         method: ENDPOINTS.register.method,
       }),
-      user: this.rootStore.apiStore.createRequest({
+      user: this.rootStore.apiStore.createRequest<{user: ApiUser}>({
         url: ENDPOINTS.user.url,
         method: ENDPOINTS.user.method,
       }),
@@ -68,6 +68,9 @@ export class UserStore implements IGlobalStore {
       return true;
     }
 
+    console.log(toJS(user));
+
+
     this._setUser(user);
     this._rootStore.routerStore.replace(RoutePath.root);
 
@@ -82,16 +85,18 @@ export class UserStore implements IGlobalStore {
     return Promise.resolve(
       new UserModel({
         id: 1,
-        username: 'Tester',
+        name: 'Tester',
+        email: 'tester@tester.com',
       })
     );
   };
 
   private readonly _authorizeInit = async (): Promise<UserModel | null> => {
-    const user = await this._requests.user.fetch();
+    const response = await this._requests.user.fetch();
+    console.log('autorizeInit')
 
-    if (user) {
-      return UserModel.fromJson(user);
+    if (response?.user) {
+      return UserModel.fromJson(response.user);
     } else {
       return null;
     }

@@ -26,14 +26,13 @@ export class FormationModel implements IFormationBase {
 
   static fromJson({ data }: { data: IFormationServer }): FormationModel {
     const formation = normalizeFormation(data);
-    // console.log('formation',formation);
-    // const positions = data.positions.map((position) =>
-    //   PositionModel.fromJson({ data: position })
-    // );
-    // console.log('positions',positions);
-    return new FormationModel(
-      formation,
-      // positions: positions,
+    const positions = data.positions.map((position) =>
+      PositionModel.fromJson({ data: position })
+    );
+    return new FormationModel({
+      ...formation,
+      positions: positions,
+    }
     );
   }
 }
