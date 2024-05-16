@@ -14,7 +14,7 @@ export class FormationModel implements IFormationBase {
   readonly sequenceNumber: number;
   readonly timeStart: string;
   readonly timeEnd: string;
-  readonly positions: PositionModel[];
+  positions: PositionModel[];
 
   constructor(data: IFormationBase) {
     this.id = data.id;
@@ -25,13 +25,15 @@ export class FormationModel implements IFormationBase {
   }
 
   static fromJson({ data }: { data: IFormationServer }): FormationModel {
-    const team = normalizeFormation(data);
-    const positions = data.positions.map((position) =>
-      PositionModel.fromJson({ data: position })
+    const formation = normalizeFormation(data);
+    // console.log('formation',formation);
+    // const positions = data.positions.map((position) =>
+    //   PositionModel.fromJson({ data: position })
+    // );
+    // console.log('positions',positions);
+    return new FormationModel(
+      formation,
+      // positions: positions,
     );
-    return new FormationModel({
-      ...team,
-      positions: positions,
-    });
   }
 }

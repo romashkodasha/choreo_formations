@@ -7,3 +7,5 @@ export * from './MembersList';
 export * from './ProjectCard';
 
 export * from './TeamCard';
+
+export * from './Snackbar';

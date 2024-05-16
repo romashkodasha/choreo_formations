@@ -1,6 +1,6 @@
 import { Method } from 'axios';
 
-export const API_URL = 'localhost:8080'
+export const API_URL = 'http://localhost:8000/api/'
 
 export type EndpointType = {
   url: string;
@@ -16,7 +16,11 @@ const createApiEndpoint = (
 });
 
 export const ENDPOINTS = {
-  auth: createApiEndpoint('user/auth', 'POST'),
+  auth: createApiEndpoint('login', 'POST'),
+  register: createApiEndpoint('register', 'POST'),
+  user: createApiEndpoint('user', 'GET'),
+  logout: createApiEndpoint('logout', 'POST'),
+  refresh: createApiEndpoint('refresh', 'POST'),
   projects: createApiEndpoint('projects', 'GET'),
   teams: createApiEndpoint('teams', 'GET'),
   loadTeam: createApiEndpoint('team', 'GET'),

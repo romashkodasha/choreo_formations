@@ -1,23 +1,28 @@
 import { ENDPOINTS } from 'config/api/endpoints';
 import { API_READY_STATE } from 'config/api/readyState';
-import { action, computed, makeObservable, observable } from 'mobx';
+import { action, computed, makeObservable, observable, toJS } from 'mobx';
 import { IGlobalStore } from 'store/interfaces';
-import { HttpAuthorizationScheme } from 'store/globals/api/types';
 import { RootStoreType } from 'store/globals/root';
 import {
   ApiAuth,
   ApiUser,
   UserModel,
   AuthData,
-  AuthLocalStorageKey,
+  RegisterData,
 } from 'store/models/UserModel';
 import { ApiRequest } from '../api/ApiRequest';
 import { MetaModel } from 'store/models/MetaModel';
+import { SnackbarMessageGoalsType } from 'entities/snackbar';
+import { RoutePath } from 'config/router';
+import { ErrorResponse } from 'store/types';
 
 export class UserStore implements IGlobalStore {
+  private readonly _rootStore: RootStoreType;
   private _user: UserModel | null = null;
   private _requests: {
     auth: ApiRequest<ApiAuth>;
+    register: ApiRequest<ApiAuth>;
+    user: ApiRequest<ApiUser, ErrorResponse>;
   };
   readonly meta = new MetaModel();
 
@@ -26,10 +31,19 @@ export class UserStore implements IGlobalStore {
   }
 
   constructor(public readonly rootStore: RootStoreType) {
+    this._rootStore = rootStore;
     this._requests = {
       auth: this.rootStore.apiStore.createRequest<ApiUser>({
         url: ENDPOINTS.auth.url,
         method: ENDPOINTS.auth.method,
+      }),
+      register: this.rootStore.apiStore.createRequest<ApiUser>({
+        url: ENDPOINTS.register.url,
+        method: ENDPOINTS.register.method,
+      }),
+      user: this.rootStore.apiStore.createRequest({
+        url: ENDPOINTS.user.url,
+        method: ENDPOINTS.user.method,
       }),
     };
     makeObservable<this, '_user' | '_setUser'>(this, {
@@ -50,10 +64,12 @@ export class UserStore implements IGlobalStore {
       : this._authorizeMock)();
 
     if (!user) {
-      return false;
+      this._rootStore.routerStore.replace(RoutePath.auth);
+      return true;
     }
 
     this._setUser(user);
+    this._rootStore.routerStore.replace(RoutePath.root);
 
     return true;
   };
@@ -71,58 +87,67 @@ export class UserStore implements IGlobalStore {
     );
   };
 
-  // todo: проверить работу при прикрутке бэка
   private readonly _authorizeInit = async (): Promise<UserModel | null> => {
-    const accessToken = localStorage.getItem(AuthLocalStorageKey.accessToken);
+    const user = await this._requests.user.fetch();
 
-    if (!accessToken) {
+    if (user) {
+      return UserModel.fromJson(user);
+    } else {
       return null;
     }
+  };
 
-    this.rootStore.apiStore.setAuthorization({
-      scheme: HttpAuthorizationScheme.Bearer,
-      data: accessToken,
-    });
+  readonly register = async ({
+    name,
+    password,
+    email,
+  }: RegisterData): Promise<UserModel | null> => {
+    this.meta.setLoadedStartMeta();
+    const payload = {
+      name,
+      password,
+      email,
+    };
 
-    const response = await this._requests.auth.fetch();
+    if (API_READY_STATE.register) {
+      const response = await this._requests.register.fetch({ data: payload });
 
-    if (!response?.user) {
-      return null;
+      if (!response?.user) {
+        this.meta.setLoadedErrorMeta();
+
+        this.rootStore.snackbarStore.openSnackbar({
+          text: 'Произошла ошибка при регистрации, проверьте правильность введенных данных',
+          goal: SnackbarMessageGoalsType.error,
+        });
+
+        return null;
+      }
+
+      return UserModel.fromJson(response.user);
     }
-
-    return UserModel.fromJson(response.user);
+    return null;
   };
 
   readonly login = async ({
-    username,
+    email,
     password,
-    rememberMe,
   }: AuthData): Promise<UserModel | null> => {
     this.meta.setLoadedStartMeta();
     const payload = {
-      username,
+      email,
       password,
     };
 
     if (API_READY_STATE.auth) {
       const response = await this._requests.auth.fetch({ data: payload });
 
-      if (response?.token) {
-        this.rootStore.apiStore.setAuthorization({
-          scheme: HttpAuthorizationScheme.Bearer,
-          data: response.token,
-        });
-        if (rememberMe) {
-          localStorage.setItem(AuthLocalStorageKey.accessToken, response.token);
-        }
-        this.meta.setLoadedSuccessMeta();
-      }
-
       if (!response?.user) {
         this.meta.setLoadedErrorMeta();
         return null;
       }
 
+      this.meta.setLoadedSuccessMeta();
+      this._rootStore.routerStore.push(RoutePath.root);
 
       return UserModel.fromJson(response.user);
     } else {

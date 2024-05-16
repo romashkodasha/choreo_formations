@@ -4,12 +4,22 @@ import s from './RegisterPage.module.scss';
 import { Button, Form, Input } from 'antd';
 import { Link } from 'react-router-dom';
 import { RoutePath } from 'config/router';
+import { useUserStore } from 'store/hooks';
+import { useRootStore } from 'store/globals/root';
 
 const RegisterPage: React.FC = () => {
   const [form] = Form.useForm();
+  const userStore = useUserStore();
+  const rootStore = useRootStore();
 
   const onFinish = (values: any) => {
-    console.log('Received values of form: ', values);
+    userStore
+      .register({
+        name: values.username,
+        password: values.password,
+        email: values.email,
+      })
+      .then(()=>rootStore.routerStore.push(RoutePath.root));
   };
 
   return (
@@ -24,18 +34,17 @@ const RegisterPage: React.FC = () => {
           className={s.form}
         >
           <Form.Item
-            name="nickname"
-            label="Nickname"
-            tooltip="What do you want others to call you?"
+            name="username"
+            label="Имя пользователя"
             rules={[
               {
                 required: true,
-                message: 'Please input your nickname!',
+                message: 'Введите имя пользователя!',
                 whitespace: true,
               },
             ]}
           >
-            <Input className={s.input}/>
+            <Input className={s.input} />
           </Form.Item>
           <Form.Item
             name="email"
@@ -51,16 +60,16 @@ const RegisterPage: React.FC = () => {
               },
             ]}
           >
-            <Input className={s.input}/>
+            <Input className={s.input} />
           </Form.Item>
 
           <Form.Item
             name="password"
-            label="Password"
+            label="Пароль"
             rules={[
               {
                 required: true,
-                message: 'Please input your password!',
+                message: 'Введите ваш пароль!',
               },
             ]}
             hasFeedback
@@ -70,22 +79,20 @@ const RegisterPage: React.FC = () => {
 
           <Form.Item
             name="confirm"
-            label="Confirm Password"
+            label="Подтверждение пароля"
             dependencies={['password']}
             hasFeedback
             rules={[
               {
                 required: true,
-                message: 'Please confirm your password!',
+                message: 'Подтвердите ваш пароль!',
               },
               ({ getFieldValue }) => ({
                 validator(_, value) {
                   if (!value || getFieldValue('password') === value) {
                     return Promise.resolve();
                   }
-                  return Promise.reject(
-                    new Error('The new password that you entered do not match!')
-                  );
+                  return Promise.reject(new Error('Пароли не совпадают!'));
                 },
               }),
             ]}
@@ -94,15 +101,13 @@ const RegisterPage: React.FC = () => {
           </Form.Item>
 
           <Form.Item className={s.button}>
-            <Button
-              type="primary"
-              htmlType="submit"
-              className={s.button}
-            >
+            <Button type="primary" htmlType="submit" className={s.button}>
               Зарегистрироваться
             </Button>
           </Form.Item>
-          <Form.Item className={s.login}>Уже есть аккаунт?{' '}<Link to={RoutePath.auth}>Войти!</Link></Form.Item>
+          <Form.Item className={s.login}>
+            Уже есть аккаунт? <Link to={RoutePath.auth}>Войти!</Link>
+          </Form.Item>
         </Form>
       </div>
     </div>

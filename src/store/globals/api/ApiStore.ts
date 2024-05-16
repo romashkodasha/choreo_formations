@@ -1,7 +1,6 @@
 import axios, {
   type AxiosResponse,
   type AxiosInstance,
-  type CreateAxiosDefaults,
 } from 'axios';
 
 import type { ApiRequestParams, HttpAuthorizationDataType,  } from './types';
@@ -20,6 +19,7 @@ export class ApiStore {
       headers: {
         ['Content-Type']: 'application/json',
       },
+      withCredentials: true,
     });
 
     this._axiosInstance.interceptors.response.use(

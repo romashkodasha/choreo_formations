@@ -7,13 +7,13 @@ import { useChoreoStore } from 'store/locals/ChoreoStore';
 // import { parseTime } from 'utils/parseTime';
 
 const DanceSimulation: React.FC = () => {
-  const { formations, members } = useChoreoStore();
+  // const { formations, members } = useChoreoStore();
 
-  if (!members || !formations) return;
+  // if (!members || !formations) return;
 
-  const [springs, api] = useSprings(members.length, () => ({
-    from: formations
-  }), []);
+  // const [springs, api] = useSprings(members.length, () => ({
+  //   from: formations
+  // }), []);
 
   return <></>;
 

@@ -2,30 +2,19 @@ import * as React from 'react';
 
 import s from './AuthPage.module.scss';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import { Button, Checkbox, Form, Input } from 'antd';
-import { Logo, ScreenSpinner } from 'components/common';
+import { Button, Form, Input } from 'antd';
+import { Logo } from 'components/common';
 import { Link } from 'react-router-dom';
 import { RoutePath } from 'config/router';
-import { useRouterStore, useUserStore } from 'store/hooks';
+import { useUserStore } from 'store/hooks';
 import { observer } from 'mobx-react';
 
 const AuthPage: React.FC = () => {
   const userStore = useUserStore();
-  const { replace } = useRouterStore();
 
   const onFinish = (values: any) => {
     userStore.login(values);
   };
-
-  if (userStore.meta.isLoading) {
-    return <ScreenSpinner />;
-  }
-
-  React.useEffect(() => {
-    if (userStore.meta.isLoaded) {
-      replace(RoutePath.root);
-    }
-  }, [userStore.meta.isLoaded, replace]);
 
   return (
     <div className={s.page}>
@@ -38,12 +27,12 @@ const AuthPage: React.FC = () => {
           onFinish={onFinish}
         >
           <Form.Item
-            name="username"
-            rules={[{ required: true, message: 'Введите имя пользователя!' }]}
+            name="email"
+            rules={[{ required: true, message: 'Введите email!' }]}
           >
             <Input
               prefix={<UserOutlined className={s['site-form-item-icon']} />}
-              placeholder="Имя пользователя"
+              placeholder="Email"
             />
           </Form.Item>
           <Form.Item
@@ -56,15 +45,15 @@ const AuthPage: React.FC = () => {
               placeholder="Пароль"
             />
           </Form.Item>
-          <Form.Item>
-            <Form.Item name="remember" valuePropName="checked" noStyle>
+          {/* <Form.Item> */}
+            {/* <Form.Item name="remember" valuePropName="checked" noStyle>
               <Checkbox>Запомнить меня</Checkbox>
-            </Form.Item>
+            </Form.Item> */}
 
-            <Link className={s['login-form-forgot']} to={''}>
+            {/* <Link className={s['login-form-forgot']} to={''}>
               Восстановить пароль
-            </Link>
-          </Form.Item>
+            </Link> */}
+          {/* </Form.Item> */}
 
           <Form.Item>
             <Button

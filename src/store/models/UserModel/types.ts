@@ -1,6 +1,7 @@
 export interface ApiUser {
   id: number;
-  username: string | null;
+  name: string;
+  email: string;
 }
 
 export interface User {
@@ -9,16 +10,23 @@ export interface User {
 }
 
 export type AuthData = {
-  username: string;
+  email: string;
   password: string;
-  rememberMe: boolean;
 };
+
+export type RegisterData = {
+  name: string;
+  password: string;
+  email: string;
+}
 
 export interface ApiAuth {
   user: ApiUser;
   token: string;
 }
 
+
 export enum AuthLocalStorageKey {
-  accessToken = 'access_token',
+  accessToken = 'accessToken',
+  refreshToken = 'refreshToken'
 }

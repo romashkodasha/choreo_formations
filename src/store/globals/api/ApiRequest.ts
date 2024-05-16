@@ -1,7 +1,7 @@
 import { ExtendedErrorResponse } from 'entities/api';
 
 import { RootStoreType } from '../root';
-import { ILocalStore } from 'shared/interfaces/ILocalStore';
+
 import { ApiCallArgs, ApiCallResponse, ApiRequestParams, MetaState, MockApiCallResponse } from './types';
 
 import axios, {
@@ -13,6 +13,7 @@ import axios, {
 import { action, computed, makeObservable, observable, runInAction } from 'mobx';
 import { stringify } from 'qs';
 import { formatToFormData } from 'utils/formatToFormData';
+import { ILocalStore } from 'store/interfaces';
 
 export class ApiRequest<
   ResponseData,

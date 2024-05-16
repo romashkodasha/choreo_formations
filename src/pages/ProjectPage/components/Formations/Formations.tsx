@@ -4,11 +4,11 @@ import styles from './Formations.module.scss';
 import { observer } from 'mobx-react';
 
 const Formations: React.FC = () => {
-  const { formations, setSelectedFormation, selectedFormation, addFormation } =
+  const { formations, setSelectedFormationNumber, selectedFormation, addFormation } =
     useChoreoStore();
 
   const handleRowClick = (sequenceNumber: number) => {
-    setSelectedFormation(sequenceNumber);
+    setSelectedFormationNumber(sequenceNumber);
   };
   const [newTimeStart, setNewTimeStart] = React.useState('');
   const [newTimeEnd, setNewTimeEnd] = React.useState('');

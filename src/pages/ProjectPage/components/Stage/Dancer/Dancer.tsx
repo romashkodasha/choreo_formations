@@ -1,24 +1,19 @@
 import * as React from 'react';
 import styles from './Dancer.module.scss';
 import Draggable from 'react-draggable';
-import { useChoreoStore } from 'store/locals/ChoreoStore';
 import { observer } from 'mobx-react';
+import { PositionModel } from 'store/models/PositionModel';
+import { useLocalStore } from 'store/hooks';
+import { DancerStore } from 'store/locals/DancerStore';
+import { useChoreoStore } from 'store/locals/ChoreoStore';
 
 type Props = {
-  id: number;
-  name: string;
-  color: string;
+  position: PositionModel;
 };
 
-const Dancer: React.FC<Props> = ({
-  id,
-  name,
-  color,
-}) => {
-  const { selectedFormation, setPosition} = useChoreoStore();
-  const position = selectedFormation?.positions.find(
-    (position) => position.dancerId === id
-  );
+const Dancer: React.FC<Props> = ({ position}) => {
+  const {updatePositions} = useChoreoStore();
+  const dancerStore = useLocalStore(() => new DancerStore(position,  updatePositions));
   const nodeRef = React.useRef(null);
 
   const onControlledDrag = (
@@ -26,8 +21,9 @@ const Dancer: React.FC<Props> = ({
     positionDrag: { x: number; y: number }
   ) => {
     const { x, y } = positionDrag;
-    setPosition(id, x, y);
+    dancerStore.updatePosition(x, y);
   };
+
 
   return (
     <Draggable
@@ -35,13 +31,13 @@ const Dancer: React.FC<Props> = ({
       onStop={onControlledDrag}
       nodeRef={nodeRef}
       position={{
-        x: position ? position.positionX : 0,
-        y: position ? position.positionY : 0,
+        x: dancerStore.position.positionX ?? 0,
+        y: dancerStore.position.positionY ?? 0,
       }}
     >
       <div className={styles.point} ref={nodeRef}>
-        <div className={styles.dancer} style={{ backgroundColor: color }} />
-        <span>{name}</span>
+        <div className={styles.dancer} style={{ backgroundColor: position.color }} />
+        <span>{position.name}</span>
       </div>
     </Draggable>
   );

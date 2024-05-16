@@ -7,8 +7,9 @@ import { initStoreContext } from 'utils/initStoreContext';
 
 import { RouterStore } from '../router';
 import { RoutePath } from 'config/router';
-import { UserStore } from '../user/UserStore';
-import { ApiStore } from '../api/ApiStore';
+import { UserStore } from '../user';
+import { ApiStore } from '../api';
+import { SnackbarStore }from '../snackbar';
 
 interface RootStoreInitProps {
   navigate: NavigateFunction;
@@ -22,6 +23,7 @@ class RootStore {
   readonly apiStore = new ApiStore(this);
   readonly routerStore = new RouterStore(this);
   readonly userStore = new UserStore(this);
+  readonly snackbarStore = new SnackbarStore(this);
 
   readonly reload = () => {
     this.appState.reset();
@@ -40,8 +42,12 @@ class RootStore {
 
     if (success) {
       this.appState.setLoadedSuccessfully();
-      //todo: заменить на auth
-      this.routerStore.replace(RoutePath.root);
+      if (this.userStore.user) {
+        this.routerStore.replace(RoutePath.root);
+      } else {
+        console.log(this.userStore.user)
+        this.routerStore.replace(RoutePath.auth);
+      }
     } else {
       this.appState.setLoadedWithError();
       this.routerStore.replace(RoutePath.error);

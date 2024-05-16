@@ -9,6 +9,8 @@ import { useLocalStore } from 'store/hooks';
 import { ChoreoStore, ChoreoStoreProvider } from 'store/locals/ChoreoStore';
 import { useRootStore } from 'store/globals/root';
 import { useLocation } from 'react-router-dom';
+import { ScreenSpinner } from 'components/common';
+import { toJS } from 'mobx';
 
 const Stage: React.FC = () => {
   const location = useLocation();
@@ -30,6 +32,12 @@ const Stage: React.FC = () => {
     setNewDancerName('');
     setNewDancerColor('');
   };
+
+  if (choreoStore.meta.isLoading || !choreoStore.positions) {
+    return <ScreenSpinner />;
+  }
+
+  console.log(toJS(choreoStore.meta.isLoading))
 
   return (
     <ChoreoStoreProvider value={{ store: choreoStore }}>
@@ -56,10 +64,10 @@ const Stage: React.FC = () => {
         </div>
         <button onClick={handleAddDancer}>Добавить танцора</button>
 
-        {choreoStore.members && (
+        {choreoStore.positions && (
           <div className={styles.stage}>
-            {choreoStore.members.map((dancer) => (
-              <Dancer key={dancer.id} {...dancer} />
+            {choreoStore.positions.map((position) => (
+              <Dancer key={position.id} position={position} />
             ))}
           </div>
         )}
