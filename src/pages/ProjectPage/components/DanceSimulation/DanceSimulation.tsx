@@ -1,91 +1,122 @@
 import * as React from 'react';
-import { useSprings } from 'react-spring';
+import { animated, useSprings } from 'react-spring';
 import { useChoreoStore } from 'store/locals/ChoreoStore';
-// import Dancer from '../Stage/Dancer';
+import { parseTime } from 'utils/parseTime';
 
-// import style from './DanceSimulation.module.scss';
-// import { parseTime } from 'utils/parseTime';
+import s from './DanceSimulation.module.scss';
+import { observer } from 'mobx-react';
+import { Button, Typography } from 'antd';
+import {
+  PauseCircleOutlined,
+  PlayCircleOutlined,
+  RedoOutlined,
+} from '@ant-design/icons';
+import { formatTime } from 'utils/formatTime';
 
 const DanceSimulation: React.FC = () => {
-  // const { formations, members } = useChoreoStore();
+  const { formations } = useChoreoStore();
+  const [start, setStart] = React.useState(false);
+  const [pause, setPause] = React.useState(false);
+  const [currentTime, setCurrentTime] = React.useState(0);
+  const intervalRef = React.useRef<NodeJS.Timeout | number | undefined>(
+    undefined
+  );
 
-  // if (!members || !formations) return;
+  if (!formations || formations.length === 0) return <></>;
 
-  // const [springs, api] = useSprings(members.length, () => ({
-  //   from: formations
-  // }), []);
+  const [index, setIndex] = React.useState(0);
+  const [springs, setSprings] = useSprings(
+    formations[0].positions.length,
+    (i) => ({
+      from: {
+        transform: `translate(${formations[0].positions[i].positionX}px, ${formations[0].positions[i].positionY}px)`,
+      },
+      to: {
+        transform: `translate(${formations[0].positions[i].positionX}px, ${formations[0].positions[i].positionY}px)`,
+      },
+    })
+  );
 
-  return <></>;
+  const updateSprings = (prevIndex: number, nextIndex: number) => {
+    const nextFormation = formations[nextIndex];
+    const previousFormation = formations[prevIndex];
 
-  // const springs = useSprings(
-  //   formations.length,
-  //   formations.map((formation: FormationModel) => ({
-  //     from: { time: 0 },
-  //     to: { time: parseTime(formation.timeEnd) * 1000 },
-  //     reset: simulationActive,
-  //     reverse: simulationActive,
-  //     onRest: stopSimulation,
-  //   }))
-  // );
+    setSprings((i) => ({
+      from: {
+        transform: `translate(${previousFormation.positions[i].positionX}px, ${previousFormation.positions[i].positionY}px)`,
+      },
+      to: {
+        transform: `translate(${nextFormation.positions[i].positionX}px, ${nextFormation.positions[i].positionY}px)`,
+      },
+      config: {
+        duration:
+          parseTime(nextFormation.timeStart) -
+          parseTime(previousFormation.timeEnd),
+      },
+    }));
+  };
 
-  // // текущий переход
-  // const getPositions = (time: number): PositionModel[] => {
-  //   const currentFormation = formations.find(
-  //     (formation: FormationModel) =>
-  //       time >= parseTime(formation.timeStart) &&
-  //       time <= parseTime(formation.timeEnd)
-  //   );
+  React.useEffect(() => {
+    if (start && !pause) {
+      intervalRef.current = setInterval(() => {
+        setCurrentTime((prevTime) => {
+          const nextTime = prevTime + 1000;
+          const currentFormation = formations[index];
+          if (nextTime >= parseTime(currentFormation.timeEnd)) {
+            setIndex((prevIndex) => {
+              const nextIndex =
+                prevIndex === formations.length - 1 ? prevIndex : prevIndex + 1;
+              console.log('nextIndex', nextIndex);
+              updateSprings(prevIndex, nextIndex);
+              return nextIndex;
+            });
+            clearInterval(intervalRef.current);
+          }
+          return nextTime;
+        });
+      }, 1000);
 
-  //   if (currentFormation) {
-  //     return currentFormation.positions;
-  //   }
+      return () => clearInterval(intervalRef.current);
+    }
+  }, [start, pause, index, setSprings, formations]);
 
-  //   return [];
-  // };
+  const handlePause = () => {
+    setPause(true);
+    clearInterval(intervalRef.current);
+  };
 
-  // return (
-  //   <div>
-  //     <button onClick={startSimulation} disabled={simulationActive}>
-  //       Start Simulation
-  //     </button>
+  const handleRestart = () => {
+    setPause(false);
+    setIndex(0);
+    setStart(false);
+    setCurrentTime(0);
+  };
 
-  //     <div className={style.simulation}>
-  //       {springs.map((props, index) => (
-  //         <React.Fragment key={formations[index].sequenceNumber}>
-  //           {formations[index].positions.map((position: PositionModel) => {
-  //             const dancer = dancers.find(
-  //               (d) => d.dancerID === position.dancerID
-  //             );
-  //             return (
-  //               <animated.div
-  //                 key={position.dancerID}
-  //                 style={{
-  //                   position: 'absolute',
-  //                   transform: props.time
-  //                     .to((t) => getPositions(index)) // Multiply by 1000 to convert to milliseconds
-  //                     .to(
-  //                       (pos) =>
-  //                         `translate(${pos?.position_x || 0}px, ${
-  //                           pos?.position_y || 0
-  //                         }px)`
-  //                     ),
-  //                 }}
-  //               >
-  //                 {dancer && (
-  //                   <Dancer
-  //                     dancerID={dancer.dancerID}
-  //                     name={dancer.name}
-  //                     color={dancer.color}
-  //                   />
-  //                 )}
-  //               </animated.div>
-  //             );
-  //           })}
-  //         </React.Fragment>
-  //       ))}
-  //     </div>
-  //   </div>
-  // );
+  return (
+    <>
+      <div className={s.simulation}>
+        {springs.map((props, i) => (
+          <animated.div
+            key={formations[index].positions[i].id}
+            style={{
+              ...props,
+              position: 'absolute',
+            }}
+          >
+            <div
+              className={s.dancer}
+              style={{ backgroundColor: formations[index].positions[i].color }}
+            />
+            {formations[index].positions[i].name}
+          </animated.div>
+        ))}
+      </div>
+      <Button onClick={() => setStart(true)} icon={<PlayCircleOutlined />} />
+      <Button onClick={handlePause} icon={<PauseCircleOutlined />} />
+      <Button onClick={handleRestart} icon={<RedoOutlined />} />
+      <Typography.Title level={3}>{formatTime(currentTime)}</Typography.Title>
+    </>
+  );
 };
 
-export default DanceSimulation;
+export default observer(DanceSimulation);
