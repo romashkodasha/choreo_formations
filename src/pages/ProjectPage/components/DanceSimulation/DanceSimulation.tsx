@@ -15,8 +15,8 @@ import { formatTime } from 'utils/formatTime';
 
 const DanceSimulation: React.FC = () => {
   const { formations } = useChoreoStore();
-  const [start, setStart] = React.useState(false);
-  const [pause, setPause] = React.useState(false);
+  const [running, setRunning] = React.useState(false);
+  // const [pause, setPause] = React.useState(false);
   const [currentTime, setCurrentTime] = React.useState(0);
   const intervalRef = React.useRef<NodeJS.Timeout | number | undefined>(
     undefined
@@ -25,23 +25,20 @@ const DanceSimulation: React.FC = () => {
   if (!formations || formations.length === 0) return <></>;
 
   const [index, setIndex] = React.useState(0);
-  const [springs, setSprings] = useSprings(
-    formations[0].positions.length,
-    (i) => ({
-      from: {
-        transform: `translate(${formations[0].positions[i].positionX}px, ${formations[0].positions[i].positionY}px)`,
-      },
-      to: {
-        transform: `translate(${formations[0].positions[i].positionX}px, ${formations[0].positions[i].positionY}px)`,
-      },
-    })
-  );
+  const [springs, api] = useSprings(formations[0].positions.length, (i) => ({
+    from: {
+      transform: `translate(${formations[0].positions[i].positionX}px, ${formations[0].positions[i].positionY}px)`,
+    },
+    to: {
+      transform: `translate(${formations[0].positions[i].positionX}px, ${formations[0].positions[i].positionY}px)`,
+    },
+  }));
 
   const updateSprings = (prevIndex: number, nextIndex: number) => {
     const nextFormation = formations[nextIndex];
     const previousFormation = formations[prevIndex];
 
-    setSprings((i) => ({
+    api.start((i) => ({
       from: {
         transform: `translate(${previousFormation.positions[i].positionX}px, ${previousFormation.positions[i].positionY}px)`,
       },
@@ -57,7 +54,7 @@ const DanceSimulation: React.FC = () => {
   };
 
   React.useEffect(() => {
-    if (start && !pause) {
+    if (running) {
       intervalRef.current = setInterval(() => {
         setCurrentTime((prevTime) => {
           const nextTime = prevTime + 1000;
@@ -66,7 +63,6 @@ const DanceSimulation: React.FC = () => {
             setIndex((prevIndex) => {
               const nextIndex =
                 prevIndex === formations.length - 1 ? prevIndex : prevIndex + 1;
-              console.log('nextIndex', nextIndex);
               updateSprings(prevIndex, nextIndex);
               return nextIndex;
             });
@@ -78,18 +74,25 @@ const DanceSimulation: React.FC = () => {
 
       return () => clearInterval(intervalRef.current);
     }
-  }, [start, pause, index, setSprings, formations]);
+  }, [running, index, api, formations]);
 
   const handlePause = () => {
-    setPause(true);
+    setRunning(false);
     clearInterval(intervalRef.current);
+    api.pause();
   };
 
   const handleRestart = () => {
-    setPause(false);
     setIndex(0);
-    setStart(false);
     setCurrentTime(0);
+    api.set((i) => ({
+      transform: `translate(${formations[0].positions[i].positionX}px, ${formations[0].positions[i].positionY}px)`,
+    }));
+  };
+
+  const handleStart = () => {
+    setRunning(true);
+    api.resume();
   };
 
   return (
@@ -111,7 +114,7 @@ const DanceSimulation: React.FC = () => {
           </animated.div>
         ))}
       </div>
-      <Button onClick={() => setStart(true)} icon={<PlayCircleOutlined />} />
+      <Button onClick={handleStart} icon={<PlayCircleOutlined />} />
       <Button onClick={handlePause} icon={<PauseCircleOutlined />} />
       <Button onClick={handleRestart} icon={<RedoOutlined />} />
       <Typography.Title level={3}>{formatTime(currentTime)}</Typography.Title>
