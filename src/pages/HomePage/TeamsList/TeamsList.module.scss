@@ -1,3 +1,5 @@
+@import "styles/mixins.scss";
+
 .card {
     margin-bottom: 20px;
 }
@@ -7,3 +9,13 @@
     padding: 0 30px;
     margin: 0 auto;
 }
+
+.empty {
+    margin: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-direction: column;
+}
+

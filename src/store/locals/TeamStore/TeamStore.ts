@@ -5,9 +5,9 @@ import { ApiRequest } from 'store/globals/api';
 import { ENDPOINTS } from 'config/api/endpoints';
 import { action, computed, makeObservable, observable } from 'mobx';
 import { MetaModel } from 'store/models/MetaModel';
-import { MOCK_TEAMS } from 'entities/mocks/teams';
 import { TeamModel } from 'store/models/TeamModel';
 import { ITeamServer } from 'entities/team';
+
 
 class TeamStore implements ILocalStore {
   private readonly _rootStore: RootStoreType;
@@ -18,7 +18,6 @@ class TeamStore implements ILocalStore {
     loadTeam: ApiRequest<{ team: ITeamServer }, ErrorResponse>;
     editTeam: ApiRequest<{ data: 'ok' }, ErrorResponse>;
     deleteTeam: ApiRequest<{ data: 'ok' }, ErrorResponse>;
-    createTeam: ApiRequest<{ data: 'ok' }, ErrorResponse>;
   };
 
   constructor(rootStore: RootStoreType) {
@@ -38,16 +37,12 @@ class TeamStore implements ILocalStore {
         url: ENDPOINTS.deleteTeam.url,
         method: ENDPOINTS.deleteTeam.method,
       }),
-      createTeam: this._rootStore.apiStore.createRequest({
-        url: ENDPOINTS.createTeam.url,
-        method: ENDPOINTS.createTeam.method,
-      }),
     };
 
     makeObservable<TeamStore, '_team'>(this, {
       _team: observable.ref,
       team: computed,
-      setTeam: action
+      setTeam: action,
     });
   }
 
@@ -78,12 +73,6 @@ class TeamStore implements ILocalStore {
       params: {
         id,
       },
-      //todo: удалить после прикрутки бэка
-      mockResponse: {
-        data: { team: MOCK_TEAMS[id - 1] },
-        isError: false,
-        timeout: 1000,
-      },
     });
 
     if (response.isError) {
@@ -95,6 +84,7 @@ class TeamStore implements ILocalStore {
       this.meta.setLoadedSuccessMeta();
     }
   };
+
 
   static normalizeTeam = (team: ITeamServer): TeamModel => {
     return TeamModel.fromJson({ data: team as ITeamServer });

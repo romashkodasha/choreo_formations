@@ -19,12 +19,12 @@ export class TeamModel implements ITeamBase {
 
   static fromJson({ data }: { data: ITeamServer }): TeamModel {
     const team = normalizeTeam(data);
-    const members = data.members.map((member) =>
+    const members = data.members?.map((member) =>
       MemberModel.fromJson({ data: member })
     );
     return new TeamModel({
       ...team,
-      members: members,
+      members: members ?? [],
     });
   }
 }

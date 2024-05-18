@@ -17,7 +17,7 @@ const MembersList: React.FC<MembersListProps> = ({ members, className, style }) 
     <div className={cn(s.list, className)} style={style}>
       {members?.map((member) => (
         <div className={s.member} key={member.id}>
-          <Avatar className={s.avatar} style={{backgroundColor: member.color}}/>
+          <Avatar className={s.avatar} style={{backgroundColor: `#${member.color}`}}/>
           {member.name}
         </div>
       ))}

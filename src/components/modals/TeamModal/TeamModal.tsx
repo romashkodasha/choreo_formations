@@ -45,6 +45,8 @@ const TeamModal: React.FC<TeamModalProps> = ({ isOpen, close, teamId }) => {
           )
         }
         open={isOpen}
+        okText="Сохранить"
+        cancelText="Отмена"
         // onOk={handleOk}
         // confirmLoading={confirmLoading}
         onCancel={close}

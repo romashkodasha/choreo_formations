@@ -6,6 +6,6 @@ export const normalizeTeam = (data: ITeamServer): ITeam => {
   return {
     id: data.id,
     name: data.name,
-    members: data.members.map(normalizeMember),
+    members: data.members ? data.members.map(normalizeMember) : [],
   };
 };

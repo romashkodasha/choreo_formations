@@ -7,7 +7,6 @@ import { ENDPOINTS } from 'config/api/endpoints';
 import { computed, makeObservable } from 'mobx';
 import { MetaModel } from 'store/models/MetaModel';
 import { normalizeModelsList } from 'store/utils';
-import { MOCK_TEAMS } from 'entities/mocks/teams';
 import { TeamModel } from 'store/models/TeamModel';
 import { ITeamServer } from 'entities/team';
 
@@ -20,6 +19,7 @@ class TeamsStore implements ILocalStore {
 
   private readonly _requests: {
     loadTeamsList: ApiRequest<{ teams: ITeamServer[] }, ErrorResponse>;
+    createTeam: ApiRequest<{ data: 'ok' }, ErrorResponse>;
   };
 
   constructor(rootStore: RootStoreType) {
@@ -29,6 +29,10 @@ class TeamsStore implements ILocalStore {
       loadTeamsList: this._rootStore.apiStore.createRequest({
         url: ENDPOINTS.teams.url,
         method: ENDPOINTS.teams.method,
+      }),
+      createTeam: this._rootStore.apiStore.createRequest({
+        url: ENDPOINTS.createTeam.url,
+        method: ENDPOINTS.createTeam.method,
       }),
     };
 
@@ -58,18 +62,8 @@ class TeamsStore implements ILocalStore {
 
     this.meta.setLoadedStartMeta();
 
-    const response = await this._requests.loadTeamsList.call({
-      params: {
-        offset: initial ? 0 : this.teams.length,
-        limit: TEAMS_LIMIT,
-      },
-      //todo: удалить после прикрутки бэка
-      mockResponse: {
-        data: { teams: MOCK_TEAMS },
-        isError: false,
-        timeout: 1000,
-      },
-    });
+
+    const response = await this._requests.loadTeamsList.call();
 
     if (response.isError) {
       this._teams.setIsInitialLoad(false);
@@ -89,6 +83,12 @@ class TeamsStore implements ILocalStore {
       this._teams.setIsInitialLoad(true);
       this.meta.setLoadedSuccessMeta();
     }
+  };
+
+  createTeam = async (team: FormData): Promise<void> => {
+    const response = await this._requests.createTeam.call({
+      data: team,
+    })
   };
 
   static normalizeTeams = (
