@@ -9,7 +9,6 @@ import { ENDPOINTS } from 'config/api/endpoints';
 import { computed, makeObservable } from 'mobx';
 import { MetaModel } from 'store/models/MetaModel';
 import { normalizeModelsList } from 'store/utils';
-import { MOCK_PROJECTS } from 'entities/mocks/projects';
 
 const PROJECTS_LIMIT = 10;
 
@@ -63,18 +62,7 @@ class ProjectsStore implements ILocalStore {
 
     this.meta.setLoadedStartMeta();
 
-    const response = await this._requests.loadProjectsList.call({
-      params: {
-        offset: initial ? 0 : this.projects.length,
-        limit: PROJECTS_LIMIT,
-      },
-      //todo: удалить после прикрутки бэка
-      mockResponse: {
-        data: { projects: MOCK_PROJECTS },
-        isError: false,
-        timeout: 1000,
-      },
-    });
+    const response = await this._requests.loadProjectsList.call();
 
     if (response.isError) {
       this._projects.setIsInitialLoad(false);

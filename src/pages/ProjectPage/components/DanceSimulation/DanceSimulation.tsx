@@ -14,9 +14,9 @@ import {
 import { formatTime } from 'utils/formatTime';
 
 const DanceSimulation: React.FC = () => {
-  const { formations } = useChoreoStore();
+  const { formations, project } = useChoreoStore();
   const [running, setRunning] = React.useState(false);
-  // const [pause, setPause] = React.useState(false);
+
   const [currentTime, setCurrentTime] = React.useState(0);
   const intervalRef = React.useRef<NodeJS.Timeout | number | undefined>(
     undefined
@@ -97,7 +97,7 @@ const DanceSimulation: React.FC = () => {
 
   return (
     <>
-      <div className={s.simulation}>
+      <div className={s.simulation} style={{height: `${project?.height * 3}rem`, width: `${project?.width * 3}rem`}}>
         {springs.map((props, i) => (
           <animated.div
             key={formations[index].positions[i].id}
@@ -108,9 +108,9 @@ const DanceSimulation: React.FC = () => {
           >
             <div
               className={s.dancer}
-              style={{ backgroundColor: formations[index].positions[i].color }}
+              style={{ backgroundColor: `#${formations[index].positions[i].member.color}` }}
             />
-            {formations[index].positions[i].name}
+            {formations[index].positions[i].member.name}
           </animated.div>
         ))}
       </div>

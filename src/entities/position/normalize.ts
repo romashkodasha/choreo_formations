@@ -1,12 +1,11 @@
 import { IPositionServer } from './server';
 import { IPosition } from './client';
+import { normalizeMember } from 'entities/member';
 
 export const normalizePosition = (data: IPositionServer): IPosition => {
   return {
     id: data.id,
-    dancerId: data.dancerId,
-    color: data.color,
-    name: data.name,
+    member: normalizeMember(data.member),
     positionX: data.positionX,
     positionY: data.positionY,
   };

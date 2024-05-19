@@ -43,6 +43,10 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ close, isOpen }) => {
     form.resetFields();
   };
 
+  const handleAfterClose = () => {
+    projectsStore.loadProjectsList({ initial: true });
+  };
+
   return (
     <Modal
       open={isOpen}
@@ -51,6 +55,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ close, isOpen }) => {
       title="Создание проекта"
       okText="Создать"
       cancelText="Отмена"
+      afterClose={handleAfterClose}
     >
       <Form form={form}>
         <Form.Item

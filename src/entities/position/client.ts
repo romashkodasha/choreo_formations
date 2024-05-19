@@ -1,8 +1,8 @@
+import { IMember } from "entities/member";
+
 export interface IPosition {
   id: number;
-  dancerId: number;
-  color: string;
-  name: string;
+  member: IMember;
   positionX: number;
   positionY: number;
 }

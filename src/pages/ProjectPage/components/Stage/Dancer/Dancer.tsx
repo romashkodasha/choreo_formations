@@ -25,14 +25,15 @@ const Dancer: React.FC<Props> = ({ position }) => {
       bounds="parent"
       onStop={onControlledDrag}
       nodeRef={nodeRef}
+      defaultPosition={{x: 0, y: 0}}
       position={{
-        x: position.positionX ?? 0,
-        y: position.positionY ?? 0,
+        x: position.positionX,
+        y: position.positionY
       }}
     >
       <div className={styles.point} ref={nodeRef}>
-        <div className={styles.dancer} style={{ backgroundColor: position.color }} />
-        <span>{position.name}</span>
+        <div className={styles.dancer} style={{ backgroundColor: `#${position.member.color}` }} />
+        <span>{position.member.name}</span>
       </div>
     </Draggable>
   );

@@ -2,74 +2,88 @@ import * as React from 'react';
 import { useChoreoStore } from 'store/locals/ChoreoStore';
 import styles from './Formations.module.scss';
 import { observer } from 'mobx-react';
+import { Button, Form, TimePicker } from 'antd';
+import dayjs, { Dayjs } from 'dayjs';
+import { DeleteOutlined } from '@ant-design/icons';
 
 const Formations: React.FC = () => {
-  const { formations, setSelectedFormationNumber, selectedFormation, addFormation } =
-    useChoreoStore();
+  const {
+    formations,
+    setFormations,
+    selectedFormationIndex,
+    setSelectedFormationIndex,
+    addFormation,
+  } = useChoreoStore();
 
-  const handleRowClick = (sequenceNumber: number) => {
-    setSelectedFormationNumber(sequenceNumber);
+  if (!formations) return null;
+
+  const handleTimeRangeChange = (
+    index: number,
+    value: [Dayjs | null, Dayjs | null]
+  ) => {
+    const newFormations = [...formations];
+    if (value[0]) newFormations[index].timeStart = value[0].format('mm:ss');
+    if (value[1]) newFormations[index].timeEnd = value[1].format('mm:ss');
+    setFormations(newFormations);
   };
-  const [newTimeStart, setNewTimeStart] = React.useState('');
-  const [newTimeEnd, setNewTimeEnd] = React.useState('');
+
+  const handleRowClick = (index: number) => {
+    setSelectedFormationIndex(index);
+  };
 
   const handleAddFormationClick = () => {
-    addFormation(newTimeStart, newTimeEnd);
-    setNewTimeStart('');
-    setNewTimeEnd('');
+    addFormation();
+  };
+
+  const handleDeleteFormationClick = (index: number) => {
+    const newFormations = formations.filter((_, i) => i !== index);
+    setFormations(newFormations);
+    if (selectedFormationIndex === index) {
+      setSelectedFormationIndex(0);
+    } else if (selectedFormationIndex > index) {
+      setSelectedFormationIndex(selectedFormationIndex - 1);
+    }
   };
 
   return (
     <>
-      <table>
-        <thead>
-          <tr>
-            <th className={styles.cell}>Sequence Number</th>
-            <th className={styles.cell}>Time Start</th>
-            <th className={styles.cell}>Time End</th>
-          </tr>
-        </thead>
-        <tbody>
-          {formations?.map((formation) => (
-            <tr
-              key={formation.sequenceNumber}
-              onClick={() => handleRowClick(formation.sequenceNumber)}
-              className={
-                formation.sequenceNumber === selectedFormation?.sequenceNumber
-                  ? styles.selectedRow
-                  : styles.row
+      <Form>
+        {formations.map((formation, index) => (
+          <Form.Item
+            key={index}
+            label={`Промежуток времени ${index + 1}`}
+            required={true}
+          >
+            <TimePicker.RangePicker
+              value={[
+                dayjs(formation.timeStart, 'mm:ss'),
+                dayjs(formation.timeEnd, 'mm:ss'),
+              ]}
+              format={'mm:ss'}
+              placeholder={['Начало', 'Конец']}
+              onChange={(value) =>
+                handleTimeRangeChange(
+                  index,
+                  value as [Dayjs | null, Dayjs | null]
+                )
               }
-            >
-              <td className={styles.cell}>{formation.sequenceNumber}</td>
-              <td className={styles.cell}>{formation.timeStart}</td>
-              <td className={styles.cell}>{formation.timeEnd}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <div>
-        <label>
-          Время начала:
-          <input
-            type="text"
-            value={newTimeStart}
-            onChange={(e) => setNewTimeStart(e.target.value)}
-          />
-        </label>
-      </div>
-      <div>
-        <label>
-          Время окончания:
-          <input
-            type="text"
-            value={newTimeEnd}
-            onChange={(e) => setNewTimeEnd(e.target.value)}
-          />
-        </label>
-      </div>
-      <button onClick={handleAddFormationClick}>Добавить переход</button>
+              allowEmpty={[false, false]}
+              allowClear={false}
+              className={
+                index === selectedFormationIndex ? styles.selectedRow : ''
+              }
+            />
+            <Button onClick={() => handleRowClick(index)}>Выбрать</Button>
+            {formations.length > 1 && <Button danger icon={<DeleteOutlined />} onClick={() => handleDeleteFormationClick(index)}/>}
+          </Form.Item>
+        ))}
+        <Button type="primary" onClick={handleAddFormationClick}>
+          Добавить переход
+        </Button>
+      </Form>
     </>
   );
 };
 
 export default observer(Formations);
+

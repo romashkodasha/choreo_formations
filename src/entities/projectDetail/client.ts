@@ -5,7 +5,7 @@ export interface IProjectDetail {
   id: number;
   name: string;
   team: ITeam;
-  formations?: IFormation[];
+  formations: IFormation[];
   width: number;
   height: number;
 }

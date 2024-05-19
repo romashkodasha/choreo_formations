@@ -10,7 +10,7 @@ export const normalizeProjectDetail = (
     id: data.id,
     name: data.name,
     team: normalizeTeam(data.team),
-    formations: data.formations?.map(normalizeFormation),
+    formations: data.formations.map(normalizeFormation),
     width: data.width,
     height: data.height,
   };

@@ -3,8 +3,8 @@ import {
   computed,
   makeObservable,
   observable,
+  reaction,
   runInAction,
-  toJS,
 } from 'mobx';
 import { FormationModel } from 'store/models/FormationModel';
 import { ILocalStore } from 'store/interfaces';
@@ -15,45 +15,45 @@ import { ErrorResponse } from 'store/types';
 import { RootStoreType } from 'store/globals/root';
 import { MetaModel } from 'store/models/MetaModel';
 import { ENDPOINTS } from 'config/api';
-import { MOCK_PROJECTS_DETAILS } from 'entities/mocks/projects';
 import { PositionModel } from 'store/models/PositionModel';
 import { IFormationServer } from 'entities/formation';
+import { MemberModel } from 'store/models/MemberModel';
+import dayjs from 'dayjs';
 
-type PrivateType = '_projectDetail' | '_selectedFormationIndex' | '_formations';
+type PrivateType = '_project' | '_selectedFormationIndex';
 
 class ChoreoStore implements ILocalStore {
   private readonly _rootStore: RootStoreType;
-  private _projectDetail: ProjectDetailModel | null;
-  private _formations: FormationModel[] | null;
+  private _project: ProjectDetailModel | null;
   readonly meta = new MetaModel();
   private _selectedFormationIndex: number;
 
   private readonly _requests: {
-    loadProjectDetail: ApiRequest<
-      { projectDetail: IProjectDetailServer },
-      ErrorResponse
-    >;
+    loadProject: ApiRequest<{ project: IProjectDetailServer }, ErrorResponse>;
+    editProject: ApiRequest<{ project: IProjectDetailServer }, ErrorResponse>;
   };
 
   constructor(rootStore: RootStoreType) {
     this._rootStore = rootStore;
-    this._projectDetail = null;
-    this._formations = null;
+    this._project = null;
     this._selectedFormationIndex = 0;
 
     this._requests = {
-      loadProjectDetail: this._rootStore.apiStore.createRequest({
-        url: ENDPOINTS.loadProjectDetail.url,
-        method: ENDPOINTS.loadProjectDetail.method,
+      loadProject: this._rootStore.apiStore.createRequest({
+        url: ENDPOINTS.loadProject.url,
+        method: ENDPOINTS.loadProject.method,
       }),
+      editProject: this._rootStore.apiStore.createRequest({
+        url: ENDPOINTS.editProject.url,
+        method: ENDPOINTS.editProject.method,
+      })
     };
 
     makeObservable<ChoreoStore, PrivateType>(this, {
-      _projectDetail: observable,
+      _project: observable,
       _selectedFormationIndex: observable,
-      _formations: observable,
 
-      projectDetail: computed,
+      project: computed,
       formations: computed,
       members: computed,
       positions: computed,
@@ -65,45 +65,47 @@ class ChoreoStore implements ILocalStore {
 
       updateFormation: action.bound,
       removeFormation: action,
-      addDancer: action.bound,
       addFormation: action.bound,
       setSelectedFormationNumber: action.bound,
       setSelectedFormationIndex: action.bound,
-      // setPosition: action.bound,
       setProjectDetail: action.bound,
       setFormations: action.bound,
-      getPositionIndexByDancerId: action.bound,
     });
+
+    reaction(
+      () => this.project?.formations?.map((f) => f.timeStart), // Следим за изменениями timeStart в formations
+      () => this.ensureTimeOrder()
+    );
   }
 
-  get projectDetail() {
-    return this._projectDetail;
+  get project() {
+    return this._project;
   }
 
   get formations() {
-    return this._formations;
+    return this._project?.formations;
   }
 
   get members() {
-    return this._projectDetail?.team.members;
+    return this._project?.team.members ?? [];
   }
 
   get positions() {
-    if (this.formations) {
-      return this.formations[this.selectedFormationIndex].positions;
+    if (this.formations?.length) {
+      return this.formations[this.selectedFormationIndex]?.positions;
     } else return [];
   }
 
   get isLoaded(): boolean {
-    return this._requests.loadProjectDetail.isLoaded;
+    return this._requests.loadProject.isLoaded;
   }
 
   get isLoading(): boolean {
-    return this._requests.loadProjectDetail.isLoading;
+    return this._requests.loadProject.isLoading;
   }
 
   get selectedFormation(): FormationModel | null {
-    if (this._formations) return this._formations[this.selectedFormationIndex];
+    if (this.formations) return this.formations[this.selectedFormationIndex];
     else return null;
   }
 
@@ -112,31 +114,34 @@ class ChoreoStore implements ILocalStore {
   }
 
   get selectedFormationNumber(): number {
-    if (this._formations)
-      return this._formations[this._selectedFormationIndex].sequenceNumber;
+    if (this.formations)
+      return this.formations[this._selectedFormationIndex].sequenceNumber;
     else return 1;
   }
 
   get lastFormation(): FormationModel | undefined {
-    if (this.formations) return this.formations[this.formations?.length - 1];
+    if (this.formations?.length) return this.formations[this.formations?.length - 1];
   }
 
   get currentPositions(): PositionModel[] | undefined {
-    if (this._formations)
-      return this._formations[this.selectedFormationIndex]?.positions;
+    if (this.formations?.length)
+      return this.formations[this.selectedFormationIndex]?.positions;
   }
 
   setProjectDetail = (value: ProjectDetailModel | null) => {
-    this._projectDetail = value;
+    this._project = value;
   };
 
   setFormations = (formations: FormationModel[]) => {
-    this._formations = formations;
+    if (this._project) {
+      this._project.setFormations(formations);
+    }
   };
 
   setPositions = (positions: PositionModel[]) => {
-    if (this._formations) {
-      this._formations[this.selectedFormationIndex].positions = positions;
+    if (this._project && this._project.formations) {
+      this._project.formations[this.selectedFormationIndex].positions =
+        positions;
     }
   };
 
@@ -147,16 +152,9 @@ class ChoreoStore implements ILocalStore {
 
     this.meta.setLoadedStartMeta();
 
-    const response = await this._requests.loadProjectDetail.call({
+    const response = await this._requests.loadProject.call({
       params: {
         id,
-      },
-
-      //todo: удалить после прикрутки бэка
-      mockResponse: {
-        data: { projectDetail: MOCK_PROJECTS_DETAILS[id - 1] },
-        isError: false,
-        timeout: 1000,
       },
     });
 
@@ -166,19 +164,57 @@ class ChoreoStore implements ILocalStore {
     } else {
       runInAction(() => {
         this.setProjectDetail(
-          ChoreoStore.normalizeChoreo(response.data.projectDetail)
+          ChoreoStore.normalizeChoreo(response.data.project)
         );
 
-        this.setFormations(
-          ChoreoStore.normalizeFormations(
-            response.data.projectDetail.formations
-          )
-        );
+        if (this._project?.formations?.length) {
+          this.setFormations(
+            ChoreoStore.normalizeFormations(response.data.project.formations)
+          );
+        } else {
+          if (this.project) {
+            this.setFormations([
+              new FormationModel({
+                id: 1,
+                sequenceNumber: 1,
+                timeStart: '00:00',
+                timeEnd: '00:10',
+                positions: this.project.team.members.map(
+                  (member) =>
+                    new PositionModel({
+                      id: member.id,
+                      member: new MemberModel({
+                        id: member.id,
+                        name: member.name,
+                        color: member.color,
+                      }),
+                      positionX: 0,
+                      positionY: 0,
+                    })
+                ),
+              }),
+            ]);
+          }
+        }
 
         this.meta.setLoadedSuccessMeta();
       });
     }
   };
+
+  editProject = async () => {
+    if (this._project) {
+      await this._requests.editProject.call({
+        params: {
+          id: this._project.id,
+        },
+        data: this.project ?? {},
+      });
+    }
+  };
+
+
+
 
   static normalizeChoreo = (
     choreo: IProjectDetailServer
@@ -198,70 +234,59 @@ class ChoreoStore implements ILocalStore {
     else return [];
   };
 
-  addFormation(timeStart: string, timeEnd: string) {
-    const lastPositions: PositionModel[] = [];
-
-    if (this.formations && this.lastFormation) {
-      for (const position of this.lastFormation?.positions) {
-        lastPositions.push(Object.assign({}, position));
-      }
-      const lastNumber = this.lastFormation.sequenceNumber;
-
-      this._projectDetail?.formations?.push(
+  addFormation() {
+    if (this.formations) {
+      this.setFormations([
+        ...this.formations,
         new FormationModel({
-          id: this.lastFormation.id + 1,
-          sequenceNumber: lastNumber + 1,
-          positions: lastPositions,
-          timeStart: timeStart,
-          timeEnd: timeEnd,
-        })
-      );
+          id: this.formations.length + 1,
+          sequenceNumber: this.formations.length + 1,
+          timeStart: this.formations.length ? this.formations[this.formations.length - 1].timeEnd : '00:00',
+          timeEnd: this.formations.length ? dayjs(
+            this.formations[this.formations.length - 1].timeEnd,
+            'mm:ss'
+          )
+            .add(10, 'second')
+            .format('mm:ss') : '00:10',
+          positions: this.members.map(
+            (member, index) =>
+              new PositionModel({
+                id: member.id,
+                member: new MemberModel({
+                  id: member.id,
+                  name: member.name,
+                  color: member.color,
+                }),
+                positionX: this.lastFormation?.positions[index]?.positionX ?? 0,
+                positionY: this.lastFormation?.positions[index]?.positionY ?? 0,
+              })
+          ),
+        }),
+      ]);
     }
   }
 
   updateFormation(sequenceNumber: number, updatedFormation: FormationModel) {
-    if (this.formations && this._projectDetail?.formations) {
+    if (this.formations && this._project?.formations) {
       const index = this.formations.findIndex(
         (t: FormationModel) => t.sequenceNumber === sequenceNumber
       );
       if (index !== -1) {
-        this._projectDetail.formations[index] = updatedFormation;
+        this._project.formations[index] = updatedFormation;
       }
     }
   }
 
   removeFormation(sequenceNumber: number) {
-    if (this._projectDetail) {
-      this._projectDetail.formations = this.formations?.filter(
+    if (this._project) {
+      this._project.formations = this.formations?.filter(
         (t: FormationModel) => t.sequenceNumber !== sequenceNumber
       );
     }
   }
 
-  addDancer(name: string, color: string) {
-    if (this.members) {
-      const dancerID = this.members[this.members.length - 1].id + 1;
-      this._projectDetail?.team.members.push({
-        id: dancerID,
-        name: name,
-        color: color,
-      });
-      this.selectedFormation?.positions.push(new PositionModel({
-        id:
-          this.selectedFormation.positions[
-            this.selectedFormation.positions.length - 1
-          ].id + 1,
-        dancerId: dancerID,
-        name,
-        color,
-        positionX: 0,
-        positionY: 0,
-      }));
-    }
-  }
-
   setSelectedFormationNumber(sequenceNumber: number) {
-    const index = this._formations?.findIndex(
+    const index = this.formations?.findIndex(
       (formation) => formation.sequenceNumber === sequenceNumber
     );
     this._selectedFormationIndex = index ?? 0;
@@ -271,27 +296,24 @@ class ChoreoStore implements ILocalStore {
     this._selectedFormationIndex = index;
   }
 
-  // setPosition(dancerID: number, positionX: number, positionY: number) {
-  //   const targetPositionIndex = this.getPositionIndexByDancerId(dancerID);
+  ensureTimeOrder() {
+    if (this.formations)
+      for (let i = 1; i < this.formations.length; i++) {
+        const prevFormation = this.formations[i - 1];
+        const currentFormation = this.formations[i];
 
-  //   if (targetPositionIndex && this._formations) {
-  //     this._formations[this.selectedFormationIndex].positions[
-  //       targetPositionIndex
-  //     ].positionX = positionX;
-  //     this._formations[this.selectedFormationIndex].positions[
-  //       targetPositionIndex
-  //     ].positionY = positionY;
-  //   }
-  // }
-
-  getPositionIndexByDancerId(id: number) {
-    return this.selectedFormation?.positions.findIndex(
-      (position) => position.dancerId === id
-    );
+        if (
+          dayjs(currentFormation.timeStart, 'mm:ss').isBefore(
+            dayjs(prevFormation.timeEnd, 'mm:ss')
+          )
+        ) {
+          currentFormation.timeStart = prevFormation.timeEnd;
+        }
+      }
   }
 
   destroy() {
-    this._requests.loadProjectDetail.destroy();
+    this._requests.loadProject.destroy();
   }
 }
 

@@ -1,11 +1,10 @@
 import { IPosition, IPositionServer, normalizePosition } from 'entities/position';
 import { action, makeObservable, observable } from 'mobx';
+import { MemberModel } from 'store/models/MemberModel';
 
 export class PositionModel implements IPosition {
   readonly id: number;
-  readonly dancerId: number;
-  color: string;
-  name: string;
+  readonly member: MemberModel;
   positionX: number;
   positionY: number;
 
@@ -17,9 +16,7 @@ export class PositionModel implements IPosition {
     })
     
     this.id = data.id;
-    this.dancerId = data.dancerId;
-    this.color = data.color;
-    this.name = data.name;
+    this.member = new MemberModel(data.member);
     this.positionX = data.positionX;
     this.positionY = data.positionY;
   }

@@ -1,1 +1,1 @@
-export { default } from './DanceSimulation';
+export { default as DanceSimulation} from './DanceSimulation';

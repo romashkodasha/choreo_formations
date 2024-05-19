@@ -5,6 +5,7 @@ import {
 } from 'entities/projectDetail';
 import { TeamModel } from 'store/models/TeamModel';
 import { FormationModel } from 'store/models/FormationModel';
+import { action, makeObservable, observable, toJS } from 'mobx';
 
 interface IProjectDetailBase
   extends Omit<IProjectDetail, 'team' | 'formations'> {
@@ -27,6 +28,14 @@ export class ProjectDetailModel implements IProjectDetailBase {
     this.formations = data.formations;
     this.width = data.width;
     this.height = data.height;
+    makeObservable(this, {
+      formations: observable,
+      setFormations: action.bound,
+    });
+  }
+
+  setFormations(formations: FormationModel[]) {
+    this.formations = formations;
   }
 
   static fromJson({
