@@ -10,6 +10,7 @@ import { RoutePath } from 'config/router';
 import { UserStore } from '../user';
 import { ApiStore } from '../api';
 import { SnackbarStore }from '../snackbar';
+import { UIStore } from '../ui';
 
 interface RootStoreInitProps {
   navigate: NavigateFunction;
@@ -24,6 +25,7 @@ class RootStore {
   readonly routerStore = new RouterStore(this);
   readonly snackbarStore = new SnackbarStore(this);
   readonly userStore = new UserStore(this);
+  readonly uiStore = new UIStore();
 
   readonly reload = () => {
     this.appState.reset();
@@ -74,6 +76,7 @@ class RootStore {
   readonly destroy = (): void => {
     this.routerStore.destroy();
     this.userStore.destroy();
+    this.snackbarStore.destroy();
   };
 }
 

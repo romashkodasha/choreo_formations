@@ -40,7 +40,7 @@ const TeamCard: React.FC<TeamCardProps> = ({ team, className }) => {
         </div>
         <RightOutlined className={s.arrow} />
       </div>
-      { isOpen && <TeamModal isOpen={isOpen} close={close} teamId={team.id} /> }
+      <TeamModal isOpen={isOpen} close={close} team={team} />
     </>
   );
 };

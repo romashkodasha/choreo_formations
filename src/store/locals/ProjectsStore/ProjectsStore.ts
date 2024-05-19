@@ -20,6 +20,7 @@ class ProjectsStore implements ILocalStore {
 
   private readonly _requests: {
     loadProjectsList: ApiRequest<{ projects: IProjectServer[] }, ErrorResponse>;
+    createProject: ApiRequest<{ data: 'ok' }, ErrorResponse>;
   };
 
   constructor(rootStore: RootStoreType) {
@@ -30,6 +31,10 @@ class ProjectsStore implements ILocalStore {
         url: ENDPOINTS.projects.url,
         method: ENDPOINTS.projects.method,
       }),
+      createProject: this._rootStore.apiStore.createRequest({
+        url: ENDPOINTS.createProject.url,
+        method: ENDPOINTS.createProject.method,
+      })
     };
 
     makeObservable<ProjectsStore>(this, {
@@ -91,6 +96,10 @@ class ProjectsStore implements ILocalStore {
       this._projects.setIsInitialLoad(true);
       this.meta.setLoadedSuccessMeta();
     }
+  };
+
+  createProject = async (project: FormData): Promise<void> => {
+    await this._requests.createProject.call({data: project});
   };
 
   static normalizeProjects = (

@@ -20,6 +20,8 @@ class TeamsStore implements ILocalStore {
   private readonly _requests: {
     loadTeamsList: ApiRequest<{ teams: ITeamServer[] }, ErrorResponse>;
     createTeam: ApiRequest<{ data: 'ok' }, ErrorResponse>;
+    editTeam: ApiRequest<{ data: 'ok' }, ErrorResponse>;
+    deleteTeam: ApiRequest<{ data: 'ok' }, ErrorResponse>;
   };
 
   constructor(rootStore: RootStoreType) {
@@ -34,6 +36,14 @@ class TeamsStore implements ILocalStore {
         url: ENDPOINTS.createTeam.url,
         method: ENDPOINTS.createTeam.method,
       }),
+      editTeam: this._rootStore.apiStore.createRequest({
+        url: ENDPOINTS.editTeam.url,
+        method: ENDPOINTS.editTeam.method,
+      }),
+      deleteTeam: this._rootStore.apiStore.createRequest({
+        url: ENDPOINTS.deleteTeam.url,
+        method: ENDPOINTS.deleteTeam.method,
+      })
     };
 
     makeObservable<TeamsStore>(this, {
@@ -90,6 +100,23 @@ class TeamsStore implements ILocalStore {
       data: team,
     })
   };
+
+  editTeam = async ( id: number , team: FormData): Promise<void> => {
+    const response = await this._requests.editTeam.call({
+      params: {
+        id,
+      },
+      data: team,
+    });
+  }
+
+  deleteTeam = async(id: number): Promise<void> => {
+    const response = await this._requests.deleteTeam.call({
+      params: {
+        id,
+      },
+    });
+  }
 
   static normalizeTeams = (
     data: ITeamServer[]
